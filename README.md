@@ -22,4 +22,10 @@ It illustrates how the INFINICAM could be used to achieve real-time live image p
 
 * [CamMonitor](src/CamMonitor/README.md) This code sample shows how to integrate INFINICAM SDK [PUCLIB](https://www.photron.co.jp/products/hsvcam/infinicam/tech.html) into an application that uses C++ MFC.
 
+### Support and License
+
+This samples are released under the [MIT](https://www.catch.jp/oss-license/2013/09/27/mit_license/) Licesne.
+
+If you have any questions, please contact us on the GitHub issue page.
+
 #### developed by: Photron Ltd. 
