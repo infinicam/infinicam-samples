@@ -20,4 +20,6 @@ It illustrates how the INFINICAM could be used to achieve real-time live image p
 
 * [SingleImage](src/SingleImage/README.md) This sample code implements the function to get image and decode using INFINICAM SDK [PUCLIB](https://www.photron.co.jp/products/hsvcam/infinicam/tech.html).
 
+* [CamMonitor](src/CamMonitor/README.md) This code sample shows how to integrate INFINICAM SDK [PUCLIB](https://www.photron.co.jp/products/hsvcam/infinicam/tech.html) into an application that uses C++ MFC.
+
 #### developed by: Photron Ltd. 

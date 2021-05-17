@@ -1,0 +1,656 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#ifndef APSTUDIO_INVOKED
+#include "targetver.h"
+#endif
+#include "afxres.h"
+#include "verrsrc.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// ì˙ñ{åÍ (ì˙ñ{) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
+LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
+#pragma code_page(932)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#ifndef APSTUDIO_INVOKED\r\n"
+    "#include ""targetver.h""\r\n"
+    "#endif\r\n"
+    "#include ""afxres.h""\r\n"
+    "#include ""verrsrc.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#include ""res\\CamMonitor.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""      // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_LIVE DIALOGEX 0, 0, 218, 380
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Open Camera",IDC_OPENCAMERA,7,7,65,17
+    LTEXT           "",IDC_STATIC_SERIAL,84,6,78,24
+    CONTROL         "FAN",IDC_FAN_CTRL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,174,6,29,10
+    CONTROL         "LED",IDC_LED_MODE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,174,21,28,10
+    GROUPBOX        "Setup",IDC_STATIC,6,33,204,318
+    LTEXT           "Framerate",IDC_STATIC,24,46,60,8
+    COMBOBOX        IDC_FRAMERATE,90,43,108,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Shutter Speed",IDC_STATIC,24,66,60,8
+    COMBOBOX        IDC_SHUTTERFPS,90,63,108,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Expose",IDC_STATIC,24,87,60,8
+    EDITTEXT        IDC_EXPOSE_ON,114,85,48,14,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_EXPOSE_OFF,114,103,48,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Resolution",IDC_STATIC,24,128,60,8
+    COMBOBOX        IDC_RESOLUTION,90,125,108,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Sync In",IDC_STATIC,24,150,60,8
+    CONTROL         "Internal",IDC_SYNC_IN_INTERNAL,"Button",BS_AUTORADIOBUTTON | WS_GROUP,91,150,41,10
+    CONTROL         "External",IDC_SYNC_IN_EXTERNAL,"Button",BS_AUTORADIOBUTTON,149,150,42,10
+    LTEXT           "Sync Out",IDC_STATIC,24,170,60,8
+    CONTROL         "POSI",IDC_SYNC_OUT_SIGNAL_POSI,"Button",BS_AUTORADIOBUTTON | WS_GROUP,128,170,32,10
+    CONTROL         "NEGA",IDC_SYNC_OUT_SIGNAL_NEGA,"Button",BS_AUTORADIOBUTTON,169,170,34,10
+    LTEXT           "Signal:",IDC_STATIC,90,170,30,8
+    EDITTEXT        IDC_SYNC_OUT_DELAY,129,184,45,14,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_SYNC_OUT_WIDTH,129,203,45,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Magnification:",IDC_STATIC,90,223,48,8
+    COMBOBOX        IDC_SYNC_OUT_MAGNIFICATION,144,222,48,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Quantization",IDC_STATIC,24,248,66,8
+    COMBOBOX        IDC_QUANTIZATION,90,246,108,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Decode Position",IDC_STATIC,24,270,66,8
+    LTEXT           "X:",IDC_STATIC,92,270,14,8
+    EDITTEXT        IDC_DECODE_POS_X,106,268,32,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Y:",IDC_STATIC,151,270,14,8
+    EDITTEXT        IDC_DECODE_POS_Y,165,268,32,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "W:",IDC_STATIC,92,288,14,8
+    EDITTEXT        IDC_DECODE_POS_W,106,286,32,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "H:",IDC_STATIC,151,288,14,8
+    EDITTEXT        IDC_DECODE_POS_H,165,287,32,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Acquisition mode",IDC_STATIC,25,309,59,8
+    CONTROL         "Single",IDC_ACQUISITION_SINGLE,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,91,309,35,10
+    CONTROL         "Continuous",IDC_ACQUISITION_CONTINUOUS,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,146,309,52,10
+    PUSHBUTTON      "Record",IDC_REC,12,356,54,14
+    PUSHBUTTON      "Stop",IDC_STOP,72,356,54,14
+    PUSHBUTTON      "Snapshot",IDC_SNAPSHOT,156,356,48,14
+    LTEXT           "On:",IDC_STATIC,90,87,15,8
+    LTEXT           "Off:",IDC_STATIC,89,106,15,8
+    LTEXT           "Delay:",IDC_STATIC,90,186,30,8
+    LTEXT           "Width:",IDC_STATIC,90,205,30,8
+    LTEXT           "(Clock)",IDC_STATIC,170,88,24,8
+    LTEXT           "(Clock)",IDC_STATIC,170,105,24,8
+    LTEXT           "(Clock)",IDC_STATIC,179,186,24,8
+    LTEXT           "(Clock)",IDC_STATIC,180,206,24,8
+    PUSHBUTTON      "Save to",IDC_SAVE_TO,29,330,53,14
+END
+
+IDD_OPERATION DIALOGEX 0, 0, 238, 417
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_TAB_CTRL,"SysTabControl32",0x0,7,7,224,403
+END
+
+IDD_FILE DIALOGEX 0, 0, 218, 266
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Open File",IDC_OPEN,6,6,66,18
+    GROUPBOX        "File info",IDC_STATIC,12,31,198,93
+    LTEXT           "File path",IDC_STATIC,18,49,42,8
+    EDITTEXT        IDC_FILEPATH,66,46,132,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Frame rate",IDC_STATIC,18,64,42,8
+    EDITTEXT        IDC_FILE_FRAMERATE,66,62,132,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Size",IDC_STATIC,18,80,42,8
+    EDITTEXT        IDC_IMAGE_SIZE,66,78,132,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Frame count",IDC_STATIC,18,96,42,8
+    EDITTEXT        IDC_FRAME_COUNT,66,94,132,14,ES_AUTOHSCROLL | ES_READONLY
+    GROUPBOX        "Playback",IDC_STATIC,12,131,198,97
+    EDITTEXT        IDC_START_FRAME,19,152,30,14,ES_CENTER | ES_AUTOHSCROLL | ES_WANTRETURN | ES_NUMBER
+    CONTROL         "",IDC_SPIN_START_FRAME,"msctls_updown32",UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,49,152,11,14
+    PUSHBUTTON      "<",IDC_POST_START_FRAME,65,152,18,13
+    EDITTEXT        IDC_CURRENT_FRAME,89,152,30,15,ES_CENTER | ES_AUTOHSCROLL | ES_WANTRETURN | ES_NUMBER
+    CONTROL         "",IDC_SPIN_CURRENT_FRAME,"msctls_updown32",UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,119,152,11,14
+    PUSHBUTTON      ">",IDC_POST_END_FRAME,136,152,18,13
+    EDITTEXT        IDC_END_FRAME,161,152,30,15,ES_CENTER | ES_AUTOHSCROLL | ES_WANTRETURN | ES_NUMBER
+    CONTROL         "",IDC_SPIN_END_FRAME,"msctls_updown32",UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,191,152,11,14
+    CONTROL         "",IDC_SLIDER_PLAY,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,24,179,174,15
+    PUSHBUTTON      "<<",IDC_GO_TO_START,18,201,30,15
+    PUSHBUTTON      "<",IDC_BACKWARD_FRAME,54,201,30,15
+    PUSHBUTTON      "Play",IDC_PLAY,90,201,42,15
+    PUSHBUTTON      ">",IDC_FORWARD_FRAME,138,201,30,15
+    PUSHBUTTON      ">>",IDC_GO_TO_END,174,201,30,15
+    PUSHBUTTON      "Output Drop Frames",IDC_SAVE_FRAME_INFO,120,237,78,18
+    PUSHBUTTON      "Save Bitmap",IDC_SAVE_TO_FILE,6,237,53,18
+END
+
+IDD_SELECT_CAMERA DIALOGEX 0, 0, 239, 152
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Select camera"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Open",IDOK,36,116,60,24
+    PUSHBUTTON      "Cancel",IDCANCEL,120,116,60,24
+    LTEXT           "Camera",IDC_STATIC,16,11,48,8
+    COMBOBOX        IDC_COMBO_CAMERA,110,11,90,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Single Xfer TimeOut",IDC_STATIC,16,35,82,8
+    EDITTEXT        IDC_EDIT_SINGLE_XFER_TIMEOUT,109,33,48,14,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_SPIN_SINGLE_XFER_TIMEOUT,"msctls_updown32",UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,157,32,11,14
+    LTEXT           "(0:AUTO)",IDC_STATIC,175,35,48,8
+    LTEXT           "Continuous Xfer TimeOut",IDC_STATIC,16,59,85,8
+    EDITTEXT        IDC_EDIT_CONTINUOUS_XFER_TIMEOUT,109,56,48,14,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_SPIN_CONTINUOUS_XFER_TIMEOUT,"msctls_updown32",UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,157,56,11,14
+    LTEXT           "(0:AUTO)",IDC_STATIC,175,59,48,8
+    LTEXT           "Ring Buffer Count",IDC_STATIC,16,84,74,8
+    EDITTEXT        IDC_EDIT_RING_BUF_COUNT,109,81,48,14,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_SPIN_RING_BUF_COUNT,"msctls_updown32",UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,157,81,11,14
+END
+
+IDD_PROGRESS DIALOGEX 0, 0, 235, 80
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Progress"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Stop",IDOK,92,52,50,23
+    CONTROL         "",IDC_PROGRESS_BAR,"msctls_progress32",PBS_SMOOTH | WS_BORDER,9,14,216,14
+    CTEXT           "100 / 500",IDC_PROGRESS_TEXT,84,30,66,8
+END
+
+IDD_SAVE_LIVE DIALOGEX 0, 0, 207, 98
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Save to"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,78,78,50,14
+    LTEXT           "Path",IDC_STATIC,12,15,16,8
+    EDITTEXT        IDC_FOLDERPATH,63,14,93,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Edit",IDC_REFERENCE,160,12,30,17
+    LTEXT           "File name",IDC_STATIC,12,33,39,8
+    EDITTEXT        IDC_FILENAME,63,32,93,14,ES_AUTOHSCROLL
+    LTEXT           "File type",IDC_STATIC,12,52,39,8
+    CONTROL         "Raw",IDC_SAVE_FILE_RAW,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,63,52,30,10
+    CONTROL         "CSV",IDC_SAVE_FILE_CSV,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,114,53,29,10
+END
+
+IDD_SAVE_FILE DIALOGEX 0, 0, 201, 92
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Save to"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,76,72,50,14
+    LTEXT           "Path",IDC_STATIC,12,15,16,8
+    EDITTEXT        IDC_FOLDERPATH,63,14,93,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Edit",IDC_REFERENCE,160,12,30,17
+    LTEXT           "File name",IDC_STATIC,12,33,39,8
+    EDITTEXT        IDC_FILENAME,63,32,93,14,ES_AUTOHSCROLL
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_LIVE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 211
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 373
+    END
+
+    IDD_OPERATION, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 231
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 410
+    END
+
+    IDD_FILE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 211
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 259
+    END
+
+    IDD_SELECT_CAMERA, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 232
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 145
+    END
+
+    IDD_PROGRESS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 73
+    END
+
+    IDD_SAVE_LIVE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 200
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 91
+    END
+
+    IDD_SAVE_FILE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 194
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 85
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_LIVE AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_OPERATION AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_FILE AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_SELECT_CAMERA AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_PROGRESS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_SAVE_LIVE AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_SAVE_FILE AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // ì˙ñ{åÍ (ì˙ñ{) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// âpåÍ (ïƒçë) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 207, 62
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About CamMonitor"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,14,14,20,20
+    LTEXT           "CamMonitor, Version 1.0.0.0",IDC_STATIC,42,14,132,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2020 PHOTRON LIMITED",IDC_STATIC,42,26,140,8
+    DEFPUSHBUTTON   "OK",IDOK,150,41,50,14,WS_GROUP
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 200
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 55
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_ABOUTBOX AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\CamMonitor.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_MAINFRAME TOOLBAR 24, 24
+BEGIN
+    BUTTON      ID_EDIT_ZOOM_IN
+    BUTTON      ID_EDIT_ZOOM_OUT
+    BUTTON      ID_EDIT_ZOOM_FIT
+    BUTTON      ID_EDIT_ZOOM_DEFAULT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About CamMonitor...",        ID_APP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS
+BEGIN
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,3,0,0
+ PRODUCTVERSION 1,3,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "PHOTRON LIMITED"
+            VALUE "FileDescription", "CamMonitor"
+            VALUE "FileVersion", "1.3.0.0"
+            VALUE "InternalName", "CamMonitor.exe"
+            VALUE "LegalCopyright", "Copyright (C) 2020 PHOTRON LIMITED"
+            VALUE "OriginalFilename", "CamMonitor.exe"
+            VALUE "ProductName", "Photron USB Control SDK Sample Application"
+            VALUE "ProductVersion", "1.3.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    IDP_OLE_INIT_FAILED     "OLE initialization failed.  Make sure that the OLE libraries are the correct version."
+    IDS_ERROR_FILEOPEN      "file open Error."
+    IDS_REC                 "Record"
+    IDS_RECORDING           "Recording..."
+    IDS_PLAY                "Play"
+    IDS_OPEN_FILTER         "Camera Info Header Files (*.cih)|*.cih||"
+    IDS_PAUSE               "Pause"
+    IDS_RESTART_MSG         "Writing is complete. \r\nPlease restart the software and the camera."
+    IDS_DRAWTEXT_CAMERA     "Sequence no: %1d\nSensor Temperature: %2d\n"
+    IDS_ERROR_CODE          "Error! %1!s! error code: %2!u! ."
+    IDS_SYNC_IN_INTERNAL    "Internal"
+END
+
+STRINGTABLE
+BEGIN
+    IDR_MAINFRAME           "CamMonitor"
+END
+
+STRINGTABLE
+BEGIN
+    AFX_IDS_APP_TITLE       "CamMonitor"
+    AFX_IDS_IDLEMESSAGE     "Ready"
+END
+
+STRINGTABLE
+BEGIN
+    ID_INDICATOR_EXT        "EXT"
+    ID_INDICATOR_CAPS       "CAP"
+    ID_INDICATOR_NUM        "NUM"
+    ID_INDICATOR_SCRL       "SCRL"
+    ID_INDICATOR_OVR        "OVR"
+    ID_INDICATOR_REC        "REC"
+END
+
+STRINGTABLE
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
+    ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
+END
+
+STRINGTABLE
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE
+BEGIN
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_COPY            "Copy the selection and put it on the Clipboard\nCopy"
+    ID_EDIT_CUT             "Cut the selection and put it on the Clipboard\nCut"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_PASTE           "Insert Clipboard contents\nPaste"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+    ID_EDIT_UNDO            "Undo the last action\nUndo"
+    ID_EDIT_REDO            "Redo the previously undone action\nRedo"
+END
+
+STRINGTABLE
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle Status Bar"
+END
+
+STRINGTABLE
+BEGIN
+    AFX_IDS_SCSIZE          "Change the window size"
+    AFX_IDS_SCMOVE          "Change the window position"
+    AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    AFX_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    AFX_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    AFX_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE
+BEGIN
+    AFX_IDS_SCRESTORE       "Restore the window to normal size"
+    AFX_IDS_SCTASKLIST      "Activate Task List"
+END
+
+STRINGTABLE
+BEGIN
+    ID_EDIT_ZOOM_IN         "Zoom in\nZoom in"
+    ID_EDIT_ZOOM_OUT        "Zoom out\nZoom out"
+    ID_EDIT_ZOOM_FIT        "Fit image on screen\nFit image on screen"
+    ID_EDIT_ZOOM_DEFAULT    "Display origin size\nDisplay origin size"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_STOP                "Stop"
+    IDS_CLOSE               "Close"
+    IDS_SYNC_IN_EXTERNAL    "External"
+    IDS_DRAWTEXT_FILE       "Sequence no: %1d\n"
+    IDS_QUALITY_NORMAL      "Normal"
+    IDS_QUALITY_LOW         "Low"
+    IDS_QUALITY_HIGH        "High"
+    IDS_ERROR_OUTPUT_CSV    "Output CSV Error."
+    IDS_SAVE_CSV_FILTER     "CSV File (*.csv)|*.csv||"
+    IDS_COMPLETED           "Completed."
+    IDS_ERROR_SAVE          "Save Error."
+END
+
+#endif    // âpåÍ (ïƒçë) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE 9, 1
+#include "res\CamMonitor.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"      // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
