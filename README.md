@@ -23,6 +23,4 @@ The sample software illustrates how developers can work with two cameras. In add
 
 * [SingleImage](src/SingleImage/README.md) This sample code implements the function to get image and decode using INFINICAM SDK [PUCLIB](https://www.photron.co.jp/products/hsvcam/infinicam/tech.html).
 
-* [find1000](src/find1000/README.md) This sample code implements the a deep learning network to detect objects such as people, cellphones etc.
-
 #### developed by: Photron Ltd. 
