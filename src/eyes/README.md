@@ -1,6 +1,7 @@
 # eyes
 
-![app](image/ball.png)
+https://user-images.githubusercontent.com/71418024/171850333-1c05ee7c-1c5a-425c-9448-cf4eb41f508c.mp4
+
 <hr>
 
 "eyes" is a Windows sample application for the USB high-speed streaming camera [INFINICAM UC-1](https://www.photron.co.jp/products/hsvcam/infinicam/) and its SDK with OpenCV.
