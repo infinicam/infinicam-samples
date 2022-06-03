@@ -34,17 +34,13 @@ int main(int argc, char** argv)
 
     int prevmsec = 0;
     SYSTEMTIME st;
+    bool showDc = true;
 
+    cap.setFrameSampleRate(40,1);
+
+    int counter = 0;
     for (;;)
     {
-        // wait for a new frame from camera and store it into 'frame'
-        cap.read(frame);
-        // check if we succeeded
-        if (frame.empty()) {
-            cerr << "ERROR! blank frame grabbed\n";
-            break;
-        }
-
         GetSystemTime(&st);
 
         int dur;
@@ -54,13 +50,29 @@ int main(int argc, char** argv)
         else {
             dur = st.wMilliseconds - prevmsec;
         }
+
+        Mat frame;
+        cap.readProxy(frame);   
+
         //printf("%d\n", dur);
         prevmsec = st.wMilliseconds;
 
-        // show live and wait for a key with timeout long enough to show images
-        imshow("Photron OpenCV Live Demo", frame);
-        if (waitKey(5) >= 0)
+
+        if (!frame.empty()) 
+            imshow("FastCam DC", frame);
+        
+        Mat fullFrame;
+        cap.read(fullFrame);
+        if (!fullFrame.empty()) 
+            imshow("FastCam DCT", fullFrame);
+        
+        
+        int key = waitKey(1);
+        if (key == 27)
             break;
+
+
+        ++counter;
     }
     // the camera will be deinitialized automatically in VideoCapture destructor
     return 0;

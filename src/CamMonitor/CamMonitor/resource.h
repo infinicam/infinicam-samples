@@ -32,6 +32,7 @@
 #define IDS_ERROR_SAVE_IMAGE            122
 #define IDS_ERROR_SAVE                  122
 #define IDR_MAINFRAME                   128
+#define IDS_ERROR_NOT_SUPPORTED         129
 #define IDD_CAMERA                      310
 #define IDD_OPERATION                   312
 #define IDD_FILE                        313
@@ -135,11 +136,15 @@
 #define IDC_DEVICE_VERSION              1035
 #define IDC_WRITE2                      1037
 #define IDC_BUTTON1                     1039
+#define IDC_RESETCAMERA                 1039
 #define IDC_STATIC_CAMINFO              1040
 #define IDC_STATIC_SERIAL               1041
 #define IDC_SPIN_START_FRAME            1042
 #define IDC_SPIN_CURRENT_FRAME          1043
 #define IDC_SPIN_END_FRAME              1044
+#define IDC_RESET_SEQNO                 1055
+#define IDC_SYNC_IN_SIGNAL_POSI         1056
+#define IDC_SYNC_IN_SIGNAL_NEGA         1057
 #define ID_EDIT_ZOOM_IN                 32771
 #define ID_EDIT_ZOOM_OUT                32772
 #define ID_EDIT_ZOOM_FIT                32773

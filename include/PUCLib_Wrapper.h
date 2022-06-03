@@ -144,6 +144,22 @@ namespace photron {
 			result = PUC_OpenDevice(detectInfo.nDeviceNoList[deviceID], &hDevice);
 			if (PUC_CHK_FAILED(result))
 			{
+				// Camera is Detected but cannot open then call reset
+				result = PUC_ResetDevice(detectInfo.nDeviceNoList[deviceID]);
+				if (PUC_CHK_FAILED(result))
+				{
+					m_lastErrorName = "PUC_ResetDevice error";
+					goto EXIT_LABEL;
+				}
+				result = PUC_OpenDevice(detectInfo.nDeviceNoList[deviceID], &hDevice);
+				if (PUC_CHK_FAILED(result))
+				{
+					m_lastErrorName = "PUC_ResetDevice error";
+					goto EXIT_LABEL;
+				}
+			}
+			if (PUC_CHK_FAILED(result))
+			{
 				m_lastErrorName = "PUC_OpenDevice error";
 				goto EXIT_LABEL;
 			}
@@ -258,6 +274,7 @@ namespace photron {
 */
 		PUCRESULT pause() {
 			PUCRESULT result = PUC_SUCCEEDED;
+			// std::cerr  << "cp-in-pause: hDevice=" << hDevice << std::endl;
 			if (hDevice)
 				cleanupBuffer();
 			return result;
@@ -284,7 +301,7 @@ namespace photron {
 
 		/*!
 			@~english
-				@brief Reads the latest image from the camera
+				@brief Reads the latest full sized image from the camera
 				@details Returns the buffer to the image and the image resolution
 				@param[out] width of the image
 				@param[out] height of the image
@@ -302,37 +319,42 @@ namespace photron {
 		*/
 		unsigned char* read(int& width, int& height, int& rowBytes)
 		{
+			int index = 0;
 			if (hDevice == NULL)
 				return NULL;
+			if (m_frameSampleRate[index] == 0)
+				return NULL;
 
-			
-			int readBuffer = m_readBuffer;
+			int readBuffer = m_readBuffer[index];
 			if (m_isSingleThread)
 			{
 				
 				result = PUC_GetSingleXferData(hDevice, &xferData);
 #ifdef USE_DECODE_MULITHRREAD
-				result = PUC_DecodeDataMultiThread(pDecodeBuf[m_readBuffer], 0, 0, nWidth, nHeight, nLineBytes, xferData.pData, q, m_numDecodeThreads);
+				result = PUC_DecodeDataMultiThread(pDecodeBuf[readBuffer], 0, 0, nWidth, nHeight, nLineBytes, xferData.pData, q, m_numDecodeThreads);
 #else
-				result = PUC_DecodeData(pDecodeBuf[m_readBuffer], 0, 0, nWidth, nHeight, nLineBytes, xferData.pData, q);
+				result = PUC_DecodeData(pDecodeBuf[readBuffer], 0, 0, nWidth, nHeight, nLineBytes, xferData.pData, q);
 #endif
+				nSequenceNo[index] = xferData.nSequenceNo;
 			}
 			else
 			{
+				int copyBuffer = 2;
+
+#if 0
 				// Block for a while
-				if (nReadSequenceNo == nSequenceNo) {
+				if (nReadSequenceNo[index] == nSequenceNo[index]) {
 					int numTries = 0;
 					while (numTries < 100000000) {
-						if (nReadSequenceNo != nSequenceNo)
+						if (nReadSequenceNo[index] != nSequenceNo[index])
 							break;
 						numTries++;
 					}
 				}
+#endif
 
-				int copyBuffer = 2;
-				
 				std::lock_guard<std::mutex> guard(m_mutex);
-				readBuffer = m_readBuffer;
+				readBuffer = m_readBuffer[index];
 				
 				memcpy(pDecodeBuf[copyBuffer], pDecodeBuf[readBuffer], int(nLineBytes) * int(nHeight));
 
@@ -346,9 +368,7 @@ namespace photron {
 			width = nWidth;
 			height = nHeight;
 			rowBytes = nLineBytes;
-			nReadSequenceNo = nSequenceNo;
-
-
+			nReadSequenceNo[index] = nSequenceNo[index];
 
 			return pDecodeBuf[readBuffer];
 		}
@@ -489,6 +509,7 @@ namespace photron {
 						 @n When setting to external device synchronization, the exposure time is automatically adjusted considering the variation of external devices.
 						 Set the exposure time and framerate before setting the external device synchronization.
 				@param[in] nMode The synchronous signal input mode (Internal/External)
+				@param[in] nSignal Polarity (positive/negative), Specifying the polarity is not supported for devices prior to version 1.01.
 				@return If successful, PUC_SUCCEEDED will be returned. If failed, other responses will be returned.
 				@note This function is thread-safe.
 			@~japanese
@@ -496,13 +517,14 @@ namespace photron {
 				@details デバイスを再起動すると設定はリセットされます。@n同期信号入力モードを変えると出力倍率はx1倍に戻ります。
 						 @n外部機器同期設定時、外部機器のばらつきを考慮した露光時間へ自動で調整されます。あらかじめ撮影したい露光時間と撮影速度に変更してから、外部機器同期を設定してください。
 				@param[in] nMode 同期信号入力モード（Internal／External）
+				@param[in] nSignal 極性（正極性／負極性）、極性の指定はバージョン1.01以前のデバイスでは対応していません。
 				@return 成功時はPUC_SUCCEEDED、失敗時はそれ以外が返ります。
 				@note 本関数はスレッドセーフです。
 		*/
-		PUCRESULT setSyncInMode(PUC_SYNC_MODE nMode) {
+		PUCRESULT setSyncInMode(PUC_SYNC_MODE nMode, PUC_SIGNAL nSignal) {
 			if (hDevice == NULL)
 				return PUC_ERROR_DEVICE_NOTOPEN;
-			return PUC_SetSyncInMode(hDevice, nMode);
+			return PUC_SetSyncInMode(hDevice, nMode, nSignal);
 		}
 
 		/*!
@@ -759,6 +781,89 @@ namespace photron {
 		PUC_HANDLE getPUCHandle() {
 			return hDevice;
 		}
+
+		USHORT getFullSequenceNumber() const {
+			return nReadSequenceNo[0];
+		}
+		USHORT getProxySequenceNumber() const {
+			return nReadSequenceNo[1];
+		}
+
+		/*!
+			@~english
+				@brief Reads the latest proxy image from the camera
+				@details Returns the buffer to the image and the image resolution
+				@param[out] width of the image
+				@param[out] height of the image
+				@param[out] rowBytes, number of bytes per row
+				@return If successful, a pointer to the image buffer is returned (do not delete it, just read it)
+				@note This function is thread-safe.
+			@~japanese
+				@brief カメラから最新の画像を読み込みます。
+				@details 画像へのバッファと画像解像度を返します。
+				@param[out] 横解像度
+				@param[out] 縦解像度
+				@param[out] rowBytes １ラインあたりのバイト数
+				@return 成功した場合画像バッファへのポインタが返されます。(デリートしないでください。読み込み対応のみです。)
+				@note 本関数はスレッドセーフです。
+		*/
+		unsigned char* readProxy(int& width, int& height, int& rowBytes)
+		{
+			int index = 1;
+			if (hDevice == NULL)
+				return NULL;
+			if (m_frameSampleRate[index]==0)
+				return NULL;
+
+			int readBuffer = m_readBuffer[index];
+			if (m_isSingleThread)
+			{
+				result = PUC_GetSingleXferData(hDevice, &xferData);
+				result = PUC_DecodeDCData(pDecodeBufProxy[readBuffer], 0, 0, nBlockCountX, nBlockCountY, xferData.pData);
+				nSequenceNo[index] = xferData.nSequenceNo;
+			}
+			else
+			{
+#if 0
+				// Block for a while
+				if (nReadSequenceNo[index] == nSequenceNo[index]) {
+					int numTries = 0;
+					while (numTries < 100000000) {
+						if (nReadSequenceNo[index] != nSequenceNo[index])
+							break;
+						numTries++;
+					}
+				}
+#endif
+
+				int copyBuffer = 2;
+				std::lock_guard<std::mutex> guard(m_mutex);
+				readBuffer = m_readBuffer[index];
+
+				memcpy(pDecodeBufProxy[copyBuffer], pDecodeBufProxy[readBuffer], int(nBlockCountX) * int(nBlockCountY));
+
+				readBuffer = copyBuffer;
+			}
+			if (PUC_CHK_FAILED(result))
+			{
+				m_lastErrorName = "PUC_DecodeData error";
+				return NULL;
+			}
+			width = nBlockCountX;
+			height = nBlockCountY;
+			rowBytes = nBlockCountX;
+			nReadSequenceNo[index] = nSequenceNo[index];
+
+			return pDecodeBufProxy[readBuffer];
+		}
+
+		void setFrameSampleRate(int fullRate, int proxyRate) {
+			std::lock_guard<std::mutex> guard(m_mutexSampleRate);
+			m_frameSampleRate[0] = fullRate;
+			m_frameSampleRate[1] = proxyRate;
+		}
+
+
 	private:
 
 		static void receive(PPUC_XFER_DATA_INFO info, void* userData) {
@@ -766,25 +871,45 @@ namespace photron {
 			PUINT8 pData = info->pData;
 			UINT32 nDataSize = info->nDataSize;
 			USHORT nSequenceNo = info->nSequenceNo;
-			if (nSequenceNo == that->nSequenceNo)
-				return;
-			int drawBuffer;
+
+			//if (nSequenceNo == that->nSequenceNo[1])
+			//	return;
+			int drawBuffer[2];
+			std::lock_guard<std::mutex> guard(that->m_mutexSampleRate);
+			int frameSampleRate[2];
 			{
 				std::lock_guard<std::mutex> guard(that->m_mutex);
-				drawBuffer = 1 - that->m_readBuffer;
+				drawBuffer[0] = 1 - that->m_readBuffer[0];
+				drawBuffer[1] = 1 - that->m_readBuffer[1];
+				frameSampleRate[0] = that->m_frameSampleRate[0];
+				frameSampleRate[1] = that->m_frameSampleRate[1];
 			}
 
+			bool readFull = (frameSampleRate[0]!=0) && that->counter % frameSampleRate[0] == 0;
+			if(readFull)
+			{
 #ifdef USE_DECODE_MULITHRREAD
-			that->result = PUC_DecodeDataMultiThread(that->pDecodeBuf[drawBuffer], 0, 0, that->nWidth, that->nHeight, that->nLineBytes, pData, that->q, that->m_numDecodeThreads);
+				that->result = PUC_DecodeDataMultiThread(that->pDecodeBuf[drawBuffer[0]], 0, 0, that->nWidth, that->nHeight, that->nLineBytes, pData, that->q, that->m_numDecodeThreads);
 #else
-			that->result = PUC_DecodeData(that->pDecodeBuf[drawBuffer], 0, 0, that->nWidth, that->nHeight, that->nLineBytes, pData, that->q);
+				that->result = PUC_DecodeData(that->pDecodeBuf[drawBuffer[0]], 0, 0, that->nWidth, that->nHeight, that->nLineBytes, pData, that->q);
 #endif
-			that->nSequenceNo = nSequenceNo;
+				that->nSequenceNo[0] = nSequenceNo;
+			}
 
-			that->swapBuffer();
+			bool readProxy = (frameSampleRate[1] != 0) && that->counter % frameSampleRate[1] == 0;
+			if (readProxy)
+			{
+				that->result = PUC_DecodeDCData(that->pDecodeBufProxy[drawBuffer[1]], 0, 0, that->nBlockCountX, that->nBlockCountY, pData);
+				that->nSequenceNo[1] = nSequenceNo;
+			}
+
+
+			that->swapBuffer(readFull, readProxy);
+
+			++that->counter;
 		}
 
-		USHORT nSequenceNo = -1;
+		USHORT nSequenceNo[2] = { 0, 0 };
 		PUC_HANDLE hDevice = NULL;
 		UINT32 nDataSize = 0;
 		PUC_XFER_DATA_INFO xferData = { 0 };
@@ -797,9 +922,14 @@ namespace photron {
 		int m_resolutionHeight = 800;
 		int m_frameRate = 1000;
 		int m_shutterSpeedFps = 2000;
-		USHORT nReadSequenceNo = -1;
-		int m_readBuffer = 0;
+		USHORT nReadSequenceNo[2] = { 0,0 };
+		int m_readBuffer[2] = { 0, 0 };
 		std::mutex m_mutex;
+		std::mutex m_mutexSampleRate;
+		UINT8* pDecodeBufProxy[3] = { NULL,NULL,NULL };
+		UINT32 nBlockCountX, nBlockCountY;
+		int m_frameSampleRate[2] = { 1, 0 };
+		int counter = 0;
 
 		void cleanupBuffer() {
 			if (!m_isSingleThread) {
@@ -814,17 +944,29 @@ namespace photron {
 				delete[] pDecodeBuf[1];
 			if (pDecodeBuf[2])
 				delete[] pDecodeBuf[2];
+			if (pDecodeBufProxy[0])
+				delete[] pDecodeBufProxy[0];
+			if (pDecodeBufProxy[1])
+				delete[] pDecodeBufProxy[1];
+			if (pDecodeBufProxy[2])
+				delete[] pDecodeBufProxy[2];
 
 			xferData.pData = NULL;
 			pDecodeBuf[0] = NULL;
 			pDecodeBuf[1] = NULL;
 			pDecodeBuf[2] = NULL;
+			pDecodeBufProxy[0] = NULL;
+			pDecodeBufProxy[1] = NULL;
+			pDecodeBufProxy[2] = NULL;
 		}
 
-		void swapBuffer() {
+		void swapBuffer(bool updateFull, bool updateProxy) {
 			// Swap Buffers
 			std::lock_guard<std::mutex> guard(m_mutex);
-			m_readBuffer = 1 - m_readBuffer;
+			if(updateFull)
+				m_readBuffer[0] = 1 - m_readBuffer[0];
+			if (updateProxy)
+				m_readBuffer[1] = 1 - m_readBuffer[1];
 		}
 
 		PUCRESULT setupDataBuffer() {
@@ -864,6 +1006,13 @@ namespace photron {
 			pDecodeBuf[0] = new UINT8[nLineBytes * nHeight];
 			pDecodeBuf[1] = new UINT8[nLineBytes * nHeight];
 			pDecodeBuf[2] = new UINT8[nLineBytes * nHeight];
+
+			
+			nBlockCountX = nWidth % 8 == 0 ? nWidth / 8 : (nWidth + (8 - nWidth % 8)) / 8;
+			nBlockCountY = nHeight % 8 == 0 ? nHeight / 8 : (nHeight + (8 - nHeight % 8)) / 8;
+			pDecodeBufProxy[0] = new UINT8[nBlockCountX * nBlockCountY];
+			pDecodeBufProxy[1] = new UINT8[nBlockCountX * nBlockCountY];
+			pDecodeBufProxy[2] = new UINT8[nBlockCountX * nBlockCountY];
 
 
 			if (!m_isSingleThread) {

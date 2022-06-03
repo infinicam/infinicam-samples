@@ -7,13 +7,13 @@ HelloWorld is a Windows sample application for USB high-speed streaming camera [
 
 It illustrates how the INFINICAM could be used to achieve real-time live image processing with simple capturing API [photron::PUCLib_Wrapper](../../inc/PUCLib_Wrapper.h).
 
-The code sample is just provides the minimal code to open a camera, capture and save one image, and then close the camera. 
+This code sample is just provides the minimal code to open a camera, capture and save one image, and then close the camera. 
 
 
-## Environment
-* installed Visual Studio 2019
+## Prerequisites
+* Installed Visual Studio 2019
 
-    :warning: MFC Package is required.
+    :warning: The MFC Package is required.
 
 ## Build
 1. Download and install [PUCLIB](https://www.photron.co.jp/products/hsvcam/infinicam/tech.html) SDK.
@@ -22,7 +22,7 @@ The code sample is just provides the minimal code to open a camera, capture and 
    
 3. Open [HelloWorld.sln](./HelloWorld.sln) on visual studio.
 
-4. Build
+4. Build.
 
 ------------
 
@@ -30,7 +30,7 @@ The code sample is just provides the minimal code to open a camera, capture and 
 
 1. Connect INIFINICAM UC-1 to your Windows PC with USB-C cable.
 2. Launch HelloWorld.exe in the bin folder.
-3. The application save the image to "test.bmp"
+3. The application save the image as "test.bmp"
 
 
-#### developed by: Photron Ltd.
+#### Developed by: Photron Ltd.

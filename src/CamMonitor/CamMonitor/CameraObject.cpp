@@ -2,8 +2,23 @@
 #include "CameraObject.h"
 #include "AppDefine.h"
 
+#include <string>
+
+std::wstring s2ws(const std::string& s)
+{
+	int len;
+	int slength = (int)s.length() + 1;
+	len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
+	wchar_t* buf = new wchar_t[len];
+	MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
+	std::wstring r(buf);
+	delete[] buf;
+	return r;
+}
+
 CCameraObject::CCameraObject()
-	: m_hDevice(NULL)
+	: m_nDeviceNo(0)
+	, m_hDevice(NULL)
 	, m_acquisitionMode(ACQUISITION_MODE_SINGLE)
 	, m_cbSingle(NULL)
 	, m_argSingle(NULL)
@@ -42,6 +57,7 @@ PUCRESULT CCameraObject::OpenDevice(UINT32 nDeviceNo, UINT32 nSingleXferTimeOut,
 	if (PUC_CHK_FAILED(result))
 		return result;
 
+	m_nDeviceNo = nDeviceNo;
 	m_hDevice = hDevice;
 
 	InitQuantization();
@@ -63,6 +79,8 @@ void CCameraObject::CloseDevice()
 		delete[] m_pBuffer;
 		m_pBuffer = NULL;
 	}
+
+	m_nDeviceNo = 0;
 }
 
 void CCameraObject::UpdateBuffer()
@@ -95,8 +113,7 @@ PUCRESULT CCameraObject::StartLive()
 	if (!IsOpened())
 		return PUC_SUCCEEDED;
 
-	m_thInfo.handle = CreateThread(NULL, 0, _SingleAcquitisionThread, this, 0, &nID);
-
+	m_thInfo.hThread = AfxBeginThread((AFX_THREADPROC)_SingleAcquitisionThread, (LPVOID)this);
 	if (m_acquisitionMode == ACQUISITION_MODE_CONTINUOUS)
 	{
 		result = PUC_BeginXferData(m_hDevice, _ContinuousCallback, this);
@@ -112,11 +129,16 @@ PUCRESULT CCameraObject::StopLive()
 	if (!IsOpened())
 		return PUC_SUCCEEDED;
 
+	// live‚ªstart‚³‚ê‚Ä‚¢‚È‚¢
+	if (!m_thInfo.hThread)
+		return PUC_SUCCEEDED;
+
 	m_thInfo.lock.Lock();
 	m_thInfo.exit = TRUE;
 	m_thInfo.lock.Unlock();
-	WaitForSingleObject(m_thInfo.handle, INFINITE);
-	m_thInfo.handle = NULL;
+	WaitForSingleObject(m_thInfo.hThread->m_hThread, INFINITE);
+	m_thInfo.hThread->m_hThread = NULL;
+	m_thInfo.hThread = NULL;
 	m_thInfo.exit = FALSE;
 
 	if (m_acquisitionMode == ACQUISITION_MODE_CONTINUOUS)
@@ -210,6 +232,10 @@ void CCameraObject::SingleAcquitisionThread()
 				m_cbSingle(&xferData, m_argSingle);
 		}
 		m_bufSingle.Unlock();
+		
+		string seqNo = "seqNo : " + std::to_string(xferData.nSequenceNo) + "\n";
+		//OutputDebugString(s2ws(seqNo).c_str());
+
 		// ***Unlock***
 
 		m_thInfo.preUpdateTime = nEndTime;
@@ -260,6 +286,9 @@ void CCameraObject::_ContinuousCallback(PPUC_XFER_DATA_INFO pInfo, void* pArg)
 	pObj->ContinuousCallback(pInfo);
 }
 
+
+
+
 void CCameraObject::ContinuousCallback(PPUC_XFER_DATA_INFO pInfo)
 {
 	// ***Lock***
@@ -269,6 +298,12 @@ void CCameraObject::ContinuousCallback(PPUC_XFER_DATA_INFO pInfo)
 	xferData.pData = pBuffer;
 	xferData.nDataSize = pInfo->nDataSize;
 	xferData.nSequenceNo = pInfo->nSequenceNo;
+
+	
+	string seqNo = "seqNo : " + std::to_string(xferData.nSequenceNo) + "\n";
+	//OutputDebugString(s2ws(seqNo).c_str());
+	
+
 	if (m_cbContinuous)
 		m_cbContinuous(&xferData, m_argContinuous);
 	m_bufContinuous.Unlock();

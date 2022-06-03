@@ -2,13 +2,16 @@
 
 <hr>
 
-The INFINICAM SDK is a set of Windows sample applications for USB high-speed streaming camera [INFINICAM UC-1](https://www.photron.co.jp/products/hsvcam/infinicam/).
+The INFINICAM SDK is a set of Windows sample applicat ions for USB high-speed streaming camera [INFINICAM UC-1](https://www.photron.co.jp/products/hsvcam/infinicam/).
 
 It illustrates how the INFINICAM could be used to achieve real-time live image processing with simple capturing API. As the nature of high speed live image processing, dealing with the limited performance of host PC and massive streaming data is the key to construct an efficient analyzing system.
 
 ## Samples
 
 * [bladeTrack](src/bladeTrack/README.md) The sample application "bladeTrack" explains most simple scheme of capture / process thread in conjunction with the live display. Users can easily modify the processing code to build the custom processing software maintaining the high speed capture and moderate rate of GUI display.
+
+* [eyes](src/eyes/README.md) “eyes” is a sample infinicam SDK application that demonstrates the high-speed stereo scope imaging. By using the OpenCV stereo matching functions, “eyes” detects the objects depth (distance from the camera) at 1000 fps to draw a temporal depth chart, which is far more precise than traditional 30 fps processing.
+The sample software illustrates how developers can work with two cameras. In addition, the sample also explains two sophisticated performance enhancement techniques: “Vertical Cropping” and “Proxy Access”. Applying these techniques and using Infinicam, one can achieve 2000 fps or more even on an ordinary laptop.
 
 * [HelloWorld](src/HelloWorld/README.md) The code sample is just provides the minimal code to open a camera, capture and save one image, and then close the camera. 
 
@@ -20,12 +23,6 @@ It illustrates how the INFINICAM could be used to achieve real-time live image p
 
 * [SingleImage](src/SingleImage/README.md) This sample code implements the function to get image and decode using INFINICAM SDK [PUCLIB](https://www.photron.co.jp/products/hsvcam/infinicam/tech.html).
 
-* [CamMonitor](src/CamMonitor/README.md) This code sample shows how to integrate INFINICAM SDK [PUCLIB](https://www.photron.co.jp/products/hsvcam/infinicam/tech.html) into an application that uses C++ MFC.
-
-### Support and License
-
-This samples are released under the [MIT](https://opensource.org/licenses/mit-license.php) Licesne.
-
-If you have any questions, please contact us on the GitHub issue page.
+* [find1000](src/find1000/README.md) This sample code implements the a deep learning network to detect objects such as people, cellphones etc.
 
 #### developed by: Photron Ltd. 

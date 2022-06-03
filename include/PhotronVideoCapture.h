@@ -39,6 +39,10 @@ namespace photron {
 			return m_capture->isOpened();
 		}
 
+		void release() {
+			m_capture->close();
+		}
+
 		bool read(cv::Mat &img)
 		{
 			int width, height, rowBytes;
@@ -46,6 +50,20 @@ namespace photron {
 			if (!pDecodeBuf)
 				return false;
 
+			img = cv::Mat(height, width, CV_8UC1, pDecodeBuf, rowBytes);
+			return true;
+		}
+
+		void setFrameSampleRate(int dctRate, int dcRate) {
+			m_capture->setFrameSampleRate(dctRate, dcRate);
+		}
+
+		bool readProxy(cv::Mat& img)
+		{
+			int width, height, rowBytes;
+			unsigned char* pDecodeBuf = m_capture->readProxy(width, height, rowBytes);
+			if (!pDecodeBuf)
+				return false;
 			img = cv::Mat(height, width, CV_8UC1, pDecodeBuf, rowBytes);
 			return true;
 		}

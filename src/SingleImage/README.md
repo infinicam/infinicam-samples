@@ -1,12 +1,12 @@
 # SingleImage
 
-SingleImage is quick sample code to use [INFINICAM UC-1](https://www.photron.co.jp/products/hsvcam/infinicam/). Developeed by C language.
+SingleImage is quick sample code to use [INFINICAM UC-1](https://www.photron.co.jp/products/hsvcam/infinicam/). Developed by C language.
 
 This sample code implements the function to get image and decode using INFINICAM SDK [PUCLIB](https://www.photron.co.jp/products/hsvcam/infinicam/tech.html).
 
 
-## Enviroment
-* installed Visual Studio 2019
+## Prerequisites
+* Installed Visual Studio 2019
 
 ## Build
 1. Download and install [PUCLIB](https://www.photron.co.jp/products/hsvcam/infinicam/tech.html) SDK.
@@ -15,10 +15,10 @@ This sample code implements the function to get image and decode using INFINICAM
    
 3. Open solution file on visual studio.
 
-4. Build
+4. Build.
 
-## Multi thread decode
-You can change the code below to switch decoding between single thread and multi thread.
+## Multi Thread Decode
+You can change the code below to switch between single-threaded and multi-threaded decoding.
 
 ```c
 // Note:Switch decoding to multi threading
@@ -32,9 +32,9 @@ You can change the code below to switch decoding between single thread and multi
 #endif // MULTITHREAD_DECODE
 ```
 
-This is the results of decode in threads. 
+This is the result of multi-threaded decoding. 
 
 <img src="image/result.png" width="400">
 
-#### developped by:
+#### Developed by:
 <img src="image/Photron_logo.png" width="100">

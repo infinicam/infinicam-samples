@@ -7,11 +7,11 @@
 
 struct ThreadInfo
 {
-	HANDLE handle;
+	CWinThread* hThread;
 	BOOL exit;
 	CriticalLock lock;
 	DWORD preUpdateTime;
-	ThreadInfo() : handle(NULL), exit(FALSE), preUpdateTime(0) {}
+	ThreadInfo() : hThread(NULL), exit(FALSE), preUpdateTime(0) {}
 };
 
 class CCameraObject
@@ -22,6 +22,8 @@ public:
 
 	PUCRESULT OpenDevice(UINT32 nDeviceNo, UINT32 nSingleXferTimeOut, UINT32 nContinuousXferTimeOut, UINT32 nRingBufCount);
 	void CloseDevice();
+
+	UINT32 GetDeviceNo() const { return m_nDeviceNo; }
 
 	BOOL IsOpened() const { return m_hDevice != NULL; }
 	PUC_HANDLE GetHandle() const { return m_hDevice; }
@@ -56,6 +58,7 @@ protected:
 	void ContinuousCallback(PPUC_XFER_DATA_INFO pInfo);
 
 protected:
+	UINT32 m_nDeviceNo;
 	PUC_HANDLE m_hDevice;
 
 	USHORT m_baseQ[PUC_Q_COUNT];
@@ -95,7 +98,7 @@ inline BOOL CCameraObject::SetAcquisitionMode(ACQUISITION_MODE acquisitionMode)
 inline BOOL CCameraObject::IsStartedLive() const
 {
 	if (m_acquisitionMode == ACQUISITION_MODE_SINGLE)
-		return m_thInfo.handle != NULL;
+		return m_thInfo.hThread != NULL;
 	else
 	{
 		BOOL b;

@@ -66,6 +66,8 @@ protected:
 
 	void SetExposeTime();
 
+	void UpdateLiveUI();
+
 private:
 	CCameraObject m_camera;
 
@@ -86,15 +88,16 @@ private:
 	CComboBox m_comboShutterFps;
 	CComboBox m_comboReso;
 	int m_xvSyncIn;
+	int m_xvSyncInSignal;
 	int m_xvSyncOutSignal;
-	int m_xvSyncOutDelay;
-	int m_xvSyncOutWidth;
+	UINT m_xvSyncOutDelay;
+	UINT m_xvSyncOutWidth;
 	CComboBox m_comboSyncOutMag;
 	BOOL m_xvLEDMode;
 	BOOL m_xvFanState;
 	CComboBox m_comboQuantization;
-	int m_xvExposeOn;
-	int m_xvExposeOff;
+	UINT m_xvExposeOn;
+	UINT m_xvExposeOff;
 	CPoint m_xvDecodePos;
 	CSize m_xvDecodeSize;
 
@@ -108,6 +111,7 @@ public:
 	afx_msg void OnDestroy();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnBnClickedOpencamera();
+	afx_msg void OnBnClickedResetcamera();
 	afx_msg void OnBnClickedAcquisitionSingle();
 	afx_msg void OnBnClickedAcquisitionContinuous();
 	afx_msg void OnBnClickedRec();
@@ -116,6 +120,7 @@ public:
 	afx_msg void OnCbnSelchangeShutterFps();
 	afx_msg void OnCbnSelchangeResolution();
 	afx_msg void OnBnClickedSyncIn();
+	afx_msg void OnBnClickedSyncInSignal();
 	afx_msg void OnBnClickedSyncOutSignal();
 	afx_msg void OnEnKillfocusSyncOutDelay();
 	afx_msg void OnEnKillfocusSyncOutWidth();
@@ -128,4 +133,5 @@ public:
 	afx_msg void OnEnKillfocusDecodePos();
 	afx_msg void OnBnClickedSnapshot();
 	afx_msg void OnBnClickedSaveTo();
+	afx_msg void OnBnClickedResetSeqNo();
 };
