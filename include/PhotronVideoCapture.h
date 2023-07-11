@@ -17,36 +17,60 @@ using namespace cv;
 
 namespace photron {
 
-	class VideoCapture {
-		photron::PUCLib_Wrapper* m_capture;
+	class VideoCaptureImageListener {
+	public:
+		virtual void imageReady(Mat &mat, USHORT sequenceNum) = 0;
+	};
+
+
+	class VideoCapture : public PUCLib_WrapperImageListener
+	{
+		photron::PUCLib_Wrapper* m_wrapper;
+		VideoCaptureImageListener *m_listener = nullptr;
+
+		virtual void imageReady(unsigned char* image, int width, int height, int rowBytes, USHORT sequenceNum) {
+			if (m_listener == nullptr)
+				return;
+			Mat mat = cv::Mat(height, width, CV_8UC1, image, rowBytes);
+			m_listener->imageReady(mat, sequenceNum);
+		}
 	public:
 		VideoCapture() {
-			m_capture = new PUCLib_Wrapper();
+			m_wrapper = new PUCLib_Wrapper();
 		}
 		~VideoCapture() {
-			delete m_capture;
+			delete m_wrapper;
+		}
+
+
+		void addListener(VideoCaptureImageListener* listener) {
+			this->m_listener = listener;
+			if(listener == nullptr)
+				m_wrapper->addListener(nullptr);
+			else
+				m_wrapper->addListener(this);
 		}
 
 		const char* getLastErrorName() const {
-			return m_capture->getLastErrorName();
+			return m_wrapper->getLastErrorName();
 		}
 
 		bool open(int deviceID, int apiID) {
-			return m_capture->open(deviceID) != PUC_SUCCEEDED;
+			return m_wrapper->open(deviceID) != PUC_SUCCEEDED;
 		}
 
 		bool isOpened() {
-			return m_capture->isOpened();
+			return m_wrapper->isOpened();
 		}
 
 		void release() {
-			m_capture->close();
+			m_wrapper->close();
 		}
 
 		bool read(cv::Mat &img)
 		{
 			int width, height, rowBytes;
-			unsigned char* pDecodeBuf = m_capture->read(width, height, rowBytes);
+			unsigned char* pDecodeBuf = m_wrapper->read(width, height, rowBytes);
 			if (!pDecodeBuf)
 				return false;
 
@@ -55,13 +79,13 @@ namespace photron {
 		}
 
 		void setFrameSampleRate(int dctRate, int dcRate) {
-			m_capture->setFrameSampleRate(dctRate, dcRate);
+			m_wrapper->setFrameSampleRate(dctRate, dcRate);
 		}
 
 		bool readProxy(cv::Mat& img)
 		{
 			int width, height, rowBytes;
-			unsigned char* pDecodeBuf = m_capture->readProxy(width, height, rowBytes);
+			unsigned char* pDecodeBuf = m_wrapper->readProxy(width, height, rowBytes);
 			if (!pDecodeBuf)
 				return false;
 			img = cv::Mat(height, width, CV_8UC1, pDecodeBuf, rowBytes);
@@ -84,14 +108,14 @@ namespace photron {
 
 			switch (propId) {
 			case CAP_PROP_FRAMERATE_SHUTTER_SPEED:
-				return m_capture->setFramerateShutter(value, value2);
+				return m_wrapper->setFramerateShutter(value, value2);
 				break;
 			case CAP_PROP_FRAME_WIDTH_HEIGHT:
-				return m_capture->setResolution(value, value2);
+				return m_wrapper->setResolution(value, value2);
 			case CAP_PROP_FAN_STATE:
-				return m_capture->setFanState(static_cast<PUC_MODE>(value));
+				return m_wrapper->setFanState(static_cast<PUC_MODE>(value));
 			case CAP_PROP_EXPOSURE_TIME_ON_OFF_CLK:
-				return m_capture->setExposeTime(value, value2);
+				return m_wrapper->setExposeTime(value, value2);
 			}
 
 			return false;
@@ -103,7 +127,7 @@ namespace photron {
 		}
 
 		PUCLib_Wrapper* getPUCLibWrapper() {
-			return m_capture;
+			return m_wrapper;
 		}
 
 	};

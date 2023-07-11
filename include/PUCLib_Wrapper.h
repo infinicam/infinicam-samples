@@ -22,6 +22,11 @@
 
 namespace photron {
 
+	class PUCLib_WrapperImageListener {
+	public:
+		virtual void imageReady(unsigned char* image, int width, int height, int rowBytes, USHORT sequenceNum) = 0;
+	};
+
 	class PUCLib_Wrapper {
 		bool m_isSingleThread = false; // set to false for fast performance
 		int m_numDecodeThreads = 16;
@@ -59,6 +64,10 @@ namespace photron {
 		*/
 		void setMultiThread(bool multiThread) {
 			m_isSingleThread = !multiThread;
+		}
+
+		void addListener(PUCLib_WrapperImageListener* listener) {
+			this->listener = listener;
 		}
 		
 		/*!
@@ -178,14 +187,7 @@ namespace photron {
 				goto EXIT_LABEL;
 			}
 
-			result = PUC_SetXferDataMode(hDevice, PUC_DATA_COMPRESSED);
-			if (PUC_CHK_FAILED(result))
-			{
-				m_lastErrorName = "PUC_SetXferDataMode error";
-				goto EXIT_LABEL;
-			}
-
-			result = PUC_GetXferDataSize(hDevice, PUC_DATA_COMPRESSED, &nDataSize);
+			result = PUC_GetXferDataSize(hDevice, &nDataSize);
 			if (PUC_CHK_FAILED(result))
 			{
 				m_lastErrorName = "PUC_GetXferDataSize error";
@@ -629,26 +631,6 @@ namespace photron {
 
 		/*!
 			@~english
-				@brief This sets the data transfer mode of the device.
-				@details Opening the device will reset this setting.
-				@param[in] nDataMode The data mode
-				@return If successful, PUC_SUCCEEDED will be returned. If failed, other responses will be returned.
-				@note This function is thread-safe.
-			@~japanese
-				@brief デバイスの転送データモードを設定します。
-				@details デバイスのオープン時に設定はリセットされます。
-				@param[in] nDataMode データモード
-				@return 成功時はPUC_SUCCEEDED、失敗時はそれ以外が返ります。
-				@note 本関数はスレッドセーフです。
-		*/
-		PUCRESULT setXferDataMode(PUC_DATA_MODE nDataMode) {
-			if (hDevice == NULL)
-				return PUC_ERROR_DEVICE_NOTOPEN;
-			return PUC_SetXferDataMode(hDevice, nDataMode);
-		}
-
-		/*!
-			@~english
 				@brief This sets the timeout duration (ms) for data transfer from the device.
 				@details Opening the device will reset this setting. @n
 					Set PUC_XFER_TIMEOUT_AUTO to automatically adjust the timeout duration based on the framerate. @n
@@ -867,10 +849,17 @@ namespace photron {
 	private:
 
 		static void receive(PPUC_XFER_DATA_INFO info, void* userData) {
+
 			PUCLib_Wrapper* that = (PUCLib_Wrapper*)userData;
 			PUINT8 pData = info->pData;
 			UINT32 nDataSize = info->nDataSize;
 			USHORT nSequenceNo = info->nSequenceNo;
+			if (that->listener) {
+				that->result = PUC_DecodeDataMultiThread(that->pDecodeBuf[0], 0, 0, that->nWidth, that->nHeight, that->nLineBytes, pData, that->q, that->m_numDecodeThreads);
+				that->listener->imageReady(that->pDecodeBuf[0], that->nWidth, that->nHeight, that->nLineBytes, nSequenceNo);
+				return;
+			}
+
 
 			//if (nSequenceNo == that->nSequenceNo[1])
 			//	return;
@@ -907,6 +896,7 @@ namespace photron {
 			that->swapBuffer(readFull, readProxy);
 
 			++that->counter;
+
 		}
 
 		USHORT nSequenceNo[2] = { 0, 0 };
@@ -930,6 +920,7 @@ namespace photron {
 		UINT32 nBlockCountX, nBlockCountY;
 		int m_frameSampleRate[2] = { 1, 0 };
 		int counter = 0;
+		PUCLib_WrapperImageListener* listener = nullptr;
 
 		void cleanupBuffer() {
 			if (!m_isSingleThread) {
@@ -975,7 +966,7 @@ namespace photron {
 			PUCRESULT result = PUC_SUCCEEDED;
 			
 			if (m_isSingleThread) {
-				result = PUC_GetXferDataSize(hDevice, PUC_DATA_COMPRESSED, &nDataSize);
+				result = PUC_GetXferDataSize(hDevice, &nDataSize);
 				xferData.pData = new UINT8[nDataSize];
 				result = PUC_GetSingleXferData(hDevice, &xferData);
 				if (PUC_CHK_FAILED(result))

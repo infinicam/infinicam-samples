@@ -22,7 +22,7 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{1859afe6-a9a4-4ba9-84de-87c45f9de298}</ProjectGuid>
-    <RootNamespace>cvdemo</RootNamespace>
+    <RootNamespace>cvtiles</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -153,12 +153,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="cvdemo.cpp" />
+    <ClCompile Include="cvtiles.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\inc\PhotronVideoCapture.h" />
-    <ClInclude Include="..\..\..\inc\PUCLIB.h" />
-    <ClInclude Include="..\..\..\inc\PUCLib_Wrapper.h" />
+    <ClInclude Include="..\..\..\include\PhotronVideoCapture.h" />
+    <ClInclude Include="..\..\..\include\PUCLIB.h" />
+    <ClInclude Include="..\..\..\include\PUCLib_Wrapper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
