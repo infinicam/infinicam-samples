@@ -5,7 +5,7 @@
  *	PUCCONST.h
  *	PHOTRON INFINICAM Control SDK
  *
- *	Copyright (C) 2022 PHOTRON LIMITED
+ *	Copyright (C) 2023 PHOTRON LIMITED
  */
 
 #ifdef	__cplusplus
@@ -181,27 +181,27 @@ typedef enum
 	/*! @~english  @brief This function is not supprted.
 		@~japanese @brief この関数はサポートされていません。 */
 	PUC_ERROR_NOTSUPPORT = 26,
-	/*! @~english  @brief 
+	/*! @~english  @brief GPU decode process failed.
 		@~japanese @brief GPUデコード処理に失敗しました。 */
 	PUC_ERROR_GPU_DECODE_PROCESS = 27,
 
-	/*! @~english  @brief
+	/*! @~english  @brief Failed to allocate buffer.
 	@~japanese @brief バッファの確保に失敗しました。 */
 	PUC_ERROR_ALLOCATE_BUFFUER = 28,
 
-	/*! @~english  @brief
+	/*! @~english  @brief Failed to release the buffer.
 	@~japanese @brief バッファの解放に失敗しました。 */
 	PUC_ERROR_FREE_BUFFER = 29,
 
-	/*! @~english  @brief
+	/*! @~english  @brief Failed to synchronize GPU processing.
 	@~japanese @brief GPU処理の同期に失敗しました。 */
 	PUC_ERROR_GPU_SYNCHRONIZE = 30,
 
-	/*! @~english  @brief
+	/*! @~english  @brief Failed to copy GPU memory.
 	@~japanese @brief GPUメモリのコピーに失敗しました。 */
 	PUC_ERROR_GPU_MEMORY_COPY = 31,
 
-	/*! @~english  @brief
+	/*! @~english  @brief The setup required for GPU processing is not done, please run PUC_SetupGPUDecode.
 	@~japanese @brief GPU処理に必要なセットアップが行われていません。PUC_SetupGPUDecodeを実行してください。*/
 	PUC_ERROR_GPU_UNINITIALIZE=32,
 

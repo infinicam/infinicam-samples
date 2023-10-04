@@ -3,6 +3,7 @@
 #include "resource.h"
 #include "BaseTab.h"
 #include "PUCLIB.h"
+#include "PUCUTIL.h"
 #include "CameraObject.h"
 
 class CLiveTab : public CBaseTab
@@ -104,6 +105,9 @@ private:
 	CPoint m_xvDecodePosBK;
 	CSize m_xvDecodeSizeBK;
 
+	int m_decodeMode;
+	BOOL m_enableDecodeGPU;
+
 public:
 	DECLARE_MESSAGE_MAP()
 	afx_msg LRESULT OnInitDialog(WPARAM wParam, LPARAM lParam);
@@ -134,4 +138,7 @@ public:
 	afx_msg void OnBnClickedSnapshot();
 	afx_msg void OnBnClickedSaveTo();
 	afx_msg void OnBnClickedResetSeqNo();
+	afx_msg void OnBnClickedDecodeCPU();
+	afx_msg void OnBnClickedDecodeGPU();
+
 };

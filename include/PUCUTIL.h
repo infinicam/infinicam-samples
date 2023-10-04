@@ -1,11 +1,11 @@
-#ifndef __PUCUTIL_H_
+ï»¿#ifndef __PUCUTIL_H_
 #define __PUCUTIL_H_
 
 /*
  *	PUCUTIL.h
  *	PHOTRON INFINICAM Control SDK
  *
- *	Copyright (C) 2022 PHOTRON LIMITED
+ *	Copyright (C) 2023 PHOTRON LIMITED
  */
 
 #include "PUCCONST.h"
@@ -21,30 +21,32 @@
 #define DLLAPI extern "C"
 #endif
 
- /*!
- @struct PUC_GPU_SETUP_PARAM
- @~english  @brief
- @~japanese @brief GPUƒfƒR[ƒh‚Åg—p‚·‚éƒpƒ‰ƒ[ƒ^‚ğŠi”[‚·‚é\‘¢‘Ì
- */
-struct PUC_GPU_SETUP_PARAM
-{
-	/*! @~english  @brief
-		@~japanese @brief GPUˆ—‚Åˆµ‚¤‰æ‘œ‚Ì‰ğ‘œ“x‰¡• */
-	UINT32 width;
 
-	/*! @~english  @brief
-		@~japanese @brief GPUˆ—‚Åˆµ‚¤‰æ‘œ‚Ì‰ğ‘œ“x‚‚³ */
-	UINT32 height;
-};
 
 
 #ifdef __cplusplus
-namespace pucutil
-{
 extern "C" {
 #endif
 
+/*!
+	@struct PUC_GPU_SETUP_PARAM
+	@~english  @brief A structure that stores parameters used in GPU decoding
+	@~japanese @brief GPUãƒ‡ã‚³ãƒ¼ãƒ‰ã§ä½¿ç”¨ã™ã‚‹ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’æ ¼ç´ã™ã‚‹æ§‹é€ ä½“
+*/
+typedef struct
+{
+	/*! @~english  @brief The image width on GPU process.
+		@~japanese @brief GPUå‡¦ç†ã§æ‰±ã†ç”»åƒã®è§£åƒåº¦æ¨ªå¹… */
+	UINT32 width;
 
+	/*! @~english  @brief The image height on GPU process.
+		@~japanese @brief GPUå‡¦ç†ã§æ‰±ã†ç”»åƒã®è§£åƒåº¦é«˜ã• */
+	UINT32 height;
+} PUC_GPU_SETUP_PARAM, * PPUC_GPU_SETUP_PARAM;
+
+
+namespace pucutil
+{
 
 /*!
 	@~english
@@ -56,13 +58,13 @@ extern "C" {
 		@return If successful, PUC_SUCCEEDED will be returned. If failed, other responses will be returned.
 		@note This function is thread-safe. This function can be executed in parallel.
 	@~japanese
-		@brief ˆ³k‰æ‘œƒf[ƒ^‚©‚çƒV[ƒPƒ“ƒX”Ô†‚ğ’Šo‚µ‚Ü‚·B
-		@param[in] pData ˆ³k‰æ‘œƒf[ƒ^
-		@param[in] nWidth ‰æ‘œ‚Ì‰¡•
-		@param[in] nHeight ‰æ‘œ‚Ì‚‚³
-		@param[out] pSeqNo ’Šo‚µ‚½ƒV[ƒPƒ“ƒX”Ô†‚ÌŠi”[æ
-		@return ¬Œ÷‚ÍPUC_SUCCEEDEDA¸”s‚Í‚»‚êˆÈŠO‚ª•Ô‚è‚Ü‚·B
-		@note –{ŠÖ”‚ÍƒXƒŒƒbƒhƒZ[ƒt‚Å‚·B–{ŠÖ”‚Í•À—ñÀs‚ª‰Â”\‚Å‚·B
+		@brief åœ§ç¸®ç”»åƒãƒ‡ãƒ¼ã‚¿ã‹ã‚‰ã‚·ãƒ¼ã‚±ãƒ³ã‚¹ç•ªå·ã‚’æŠ½å‡ºã—ã¾ã™ã€‚
+		@param[in] pData åœ§ç¸®ç”»åƒãƒ‡ãƒ¼ã‚¿
+		@param[in] nWidth ç”»åƒã®æ¨ªå¹…
+		@param[in] nHeight ç”»åƒã®é«˜ã•
+		@param[out] pSeqNo æŠ½å‡ºã—ãŸã‚·ãƒ¼ã‚±ãƒ³ã‚¹ç•ªå·ã®æ ¼ç´å…ˆ
+		@return æˆåŠŸæ™‚ã¯PUC_SUCCEEDEDã€å¤±æ•—æ™‚ã¯ãã‚Œä»¥å¤–ãŒè¿”ã‚Šã¾ã™ã€‚
+		@note æœ¬é–¢æ•°ã¯ã‚¹ãƒ¬ãƒƒãƒ‰ã‚»ãƒ¼ãƒ•ã§ã™ã€‚æœ¬é–¢æ•°ã¯ä¸¦åˆ—å®Ÿè¡ŒãŒå¯èƒ½ã§ã™ã€‚
 */
 DLL_EXPORT PUCRESULT WINAPI ExtractSequenceNo(const PUCHAR pData, UINT32 nWidth, UINT32 nHeight, PUSHORT pSeqNo);
 
@@ -82,17 +84,17 @@ DLL_EXPORT PUCRESULT WINAPI ExtractSequenceNo(const PUCHAR pData, UINT32 nWidth,
 		@see PUC_GetXferDataSize
 		@see PUC_GetMaxXferDataSize
 	@~japanese
-		@brief ˆ³k‰æ‘œƒf[ƒ^‚ğ‹P“x’lƒf[ƒ^‚É“WŠJ‚µ‚Ü‚·B
-		@param[out] pDst “WŠJæƒoƒbƒtƒ@B‰¡•‚Í4‚Ì”{”‚ÉØ‚èã‚°‚½ƒTƒCƒY•ªŠm•Û‚³‚ê‚Ä‚¢‚é•K—v‚ª‚ ‚è‚Ü‚·Bi—áF‰¡•‚ª1246px‚Ìê‡Aƒoƒbƒtƒ@‚Í1248ƒoƒCƒgŠm•Û‚³‚ê‚Ä‚¢‚é•K—v‚ ‚èj
-		@param[in] nX “WŠJŠJn‚·‚é¶ãÀ•WXB0‚à‚µ‚­‚Í8‚Ì”{”‚Å‚ ‚é•K—v‚ª‚ ‚è‚Ü‚·B
-		@param[in] nY “WŠJŠJn‚·‚é¶ãÀ•WYB0‚à‚µ‚­‚Í8‚Ì”{”‚Å‚ ‚é•K—v‚ª‚ ‚è‚Ü‚·B
-		@param[in] nWidth “WŠJ‚·‚é‰¡•
-		@param[in] nHeight “WŠJ‚·‚é‚‚³
-		@param[in] nLineBytes “WŠJæƒoƒbƒtƒ@‚Ì‰¡•‚ÌƒoƒCƒg”
-		@param[in] pSrc ˆ³k‰æ‘œƒf[ƒ^
-		@param[in] pQVals —Êq‰»ƒe[ƒuƒ‹
-		@return ¬Œ÷‚ÍPUC_SUCCEEDEDA¸”s‚Í‚»‚êˆÈŠO‚ª•Ô‚è‚Ü‚·B
-		@note –{ŠÖ”‚ÍƒXƒŒƒbƒhƒZ[ƒt‚Å‚·B–{ŠÖ”‚Í•À—ñÀs‚ª‰Â”\‚Å‚·B
+		@brief åœ§ç¸®ç”»åƒãƒ‡ãƒ¼ã‚¿ã‚’è¼åº¦å€¤ãƒ‡ãƒ¼ã‚¿ã«å±•é–‹ã—ã¾ã™ã€‚
+		@param[out] pDst å±•é–‹å…ˆãƒãƒƒãƒ•ã‚¡ã€‚æ¨ªå¹…ã¯4ã®å€æ•°ã«åˆ‡ã‚Šä¸Šã’ãŸã‚µã‚¤ã‚ºåˆ†ç¢ºä¿ã•ã‚Œã¦ã„ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚ï¼ˆä¾‹ï¼šæ¨ªå¹…ãŒ1246pxã®å ´åˆã€ãƒãƒƒãƒ•ã‚¡ã¯1248ãƒã‚¤ãƒˆç¢ºä¿ã•ã‚Œã¦ã„ã‚‹å¿…è¦ã‚ã‚Šï¼‰
+		@param[in] nX å±•é–‹é–‹å§‹ã™ã‚‹å·¦ä¸Šåº§æ¨™Xã€‚0ã‚‚ã—ãã¯8ã®å€æ•°ã§ã‚ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚
+		@param[in] nY å±•é–‹é–‹å§‹ã™ã‚‹å·¦ä¸Šåº§æ¨™Yã€‚0ã‚‚ã—ãã¯8ã®å€æ•°ã§ã‚ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚
+		@param[in] nWidth å±•é–‹ã™ã‚‹æ¨ªå¹…
+		@param[in] nHeight å±•é–‹ã™ã‚‹é«˜ã•
+		@param[in] nLineBytes å±•é–‹å…ˆãƒãƒƒãƒ•ã‚¡ã®æ¨ªå¹…ã®ãƒã‚¤ãƒˆæ•°
+		@param[in] pSrc åœ§ç¸®ç”»åƒãƒ‡ãƒ¼ã‚¿
+		@param[in] pQVals é‡å­åŒ–ãƒ†ãƒ¼ãƒ–ãƒ«
+		@return æˆåŠŸæ™‚ã¯PUC_SUCCEEDEDã€å¤±æ•—æ™‚ã¯ãã‚Œä»¥å¤–ãŒè¿”ã‚Šã¾ã™ã€‚
+		@note æœ¬é–¢æ•°ã¯ã‚¹ãƒ¬ãƒƒãƒ‰ã‚»ãƒ¼ãƒ•ã§ã™ã€‚æœ¬é–¢æ•°ã¯ä¸¦åˆ—å®Ÿè¡ŒãŒå¯èƒ½ã§ã™ã€‚
 		@see PUC_GetXferDataSize
 		@see PUC_GetMaxXferDataSize
 */
@@ -116,18 +118,18 @@ DLL_EXPORT PUCRESULT WINAPI DecodeData(PUINT8 pDst, UINT32 nX, UINT32 nY, UINT32
 		@see PUC_GetMaxXferDataSize
 		@see PUC_DecodeData
 	@~japanese
-		@brief ˆ³k‰æ‘œƒf[ƒ^‚ğ‹P“x’lƒf[ƒ^‚É“WŠJ‚µ‚Ü‚·B‚±‚ÌƒfƒR[ƒhˆ—‚Íƒ}ƒ‹ƒ`ƒXƒŒƒbƒh‚Ås‚í‚ê‚Ü‚·B
-		@param[out] pDst “WŠJæƒoƒbƒtƒ@B‰¡•‚Í4‚Ì”{”‚ÉØ‚èã‚°‚½ƒTƒCƒY•ªŠm•Û‚³‚ê‚Ä‚¢‚é•K—v‚ª‚ ‚è‚Ü‚·Bi—áF‰¡•‚ª1246px‚Ìê‡Aƒoƒbƒtƒ@‚Í1248ƒoƒCƒgŠm•Û‚³‚ê‚Ä‚¢‚é•K—v‚ ‚èj
-		@param[in] nX “WŠJŠJn‚·‚é¶ãÀ•WXB0‚à‚µ‚­‚Í8‚Ì”{”‚Å‚ ‚é•K—v‚ª‚ ‚è‚Ü‚·B
-		@param[in] nY “WŠJŠJn‚·‚é¶ãÀ•WYB0‚à‚µ‚­‚Í8‚Ì”{”‚Å‚ ‚é•K—v‚ª‚ ‚è‚Ü‚·B
-		@param[in] nWidth “WŠJ‚·‚é‰¡•
-		@param[in] nHeight “WŠJ‚·‚é‚‚³
-		@param[in] nLineBytes “WŠJæƒoƒbƒtƒ@‚Ì‰¡•‚ÌƒoƒCƒg”
-		@param[in] pSrc ˆ³k‰æ‘œƒf[ƒ^
-		@param[in] pQVals —Êq‰»ƒe[ƒuƒ‹
-		@param[in] nThreadCount ƒ}ƒ‹ƒ`ƒXƒŒƒbƒh‚Åˆ—‚·‚éƒXƒŒƒbƒh”
-		@return ¬Œ÷‚ÍPUC_SUCCEEDEDA¸”s‚Í‚»‚êˆÈŠO‚ª•Ô‚è‚Ü‚·B
-		@note –{ŠÖ”‚ÍƒXƒŒƒbƒhƒZ[ƒt‚Å‚·B–{ŠÖ”‚Í•À—ñÀs‚ª‰Â”\‚Å‚·B
+		@brief åœ§ç¸®ç”»åƒãƒ‡ãƒ¼ã‚¿ã‚’è¼åº¦å€¤ãƒ‡ãƒ¼ã‚¿ã«å±•é–‹ã—ã¾ã™ã€‚ã“ã®ãƒ‡ã‚³ãƒ¼ãƒ‰å‡¦ç†ã¯ãƒãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰ã§è¡Œã‚ã‚Œã¾ã™ã€‚
+		@param[out] pDst å±•é–‹å…ˆãƒãƒƒãƒ•ã‚¡ã€‚æ¨ªå¹…ã¯4ã®å€æ•°ã«åˆ‡ã‚Šä¸Šã’ãŸã‚µã‚¤ã‚ºåˆ†ç¢ºä¿ã•ã‚Œã¦ã„ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚ï¼ˆä¾‹ï¼šæ¨ªå¹…ãŒ1246pxã®å ´åˆã€ãƒãƒƒãƒ•ã‚¡ã¯1248ãƒã‚¤ãƒˆç¢ºä¿ã•ã‚Œã¦ã„ã‚‹å¿…è¦ã‚ã‚Šï¼‰
+		@param[in] nX å±•é–‹é–‹å§‹ã™ã‚‹å·¦ä¸Šåº§æ¨™Xã€‚0ã‚‚ã—ãã¯8ã®å€æ•°ã§ã‚ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚
+		@param[in] nY å±•é–‹é–‹å§‹ã™ã‚‹å·¦ä¸Šåº§æ¨™Yã€‚0ã‚‚ã—ãã¯8ã®å€æ•°ã§ã‚ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚
+		@param[in] nWidth å±•é–‹ã™ã‚‹æ¨ªå¹…
+		@param[in] nHeight å±•é–‹ã™ã‚‹é«˜ã•
+		@param[in] nLineBytes å±•é–‹å…ˆãƒãƒƒãƒ•ã‚¡ã®æ¨ªå¹…ã®ãƒã‚¤ãƒˆæ•°
+		@param[in] pSrc åœ§ç¸®ç”»åƒãƒ‡ãƒ¼ã‚¿
+		@param[in] pQVals é‡å­åŒ–ãƒ†ãƒ¼ãƒ–ãƒ«
+		@param[in] nThreadCount ãƒãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰ã§å‡¦ç†ã™ã‚‹ã‚¹ãƒ¬ãƒƒãƒ‰æ•°
+		@return æˆåŠŸæ™‚ã¯PUC_SUCCEEDEDã€å¤±æ•—æ™‚ã¯ãã‚Œä»¥å¤–ãŒè¿”ã‚Šã¾ã™ã€‚
+		@note æœ¬é–¢æ•°ã¯ã‚¹ãƒ¬ãƒƒãƒ‰ã‚»ãƒ¼ãƒ•ã§ã™ã€‚æœ¬é–¢æ•°ã¯ä¸¦åˆ—å®Ÿè¡ŒãŒå¯èƒ½ã§ã™ã€‚
 		@see PUC_GetXferDataSize
 		@see PUC_GetMaxXferDataSize
 		@see PUC_DecodeData
@@ -150,17 +152,17 @@ DLL_EXPORT PUCRESULT WINAPI DecodeDataMultiThread(PUINT8 pDst, UINT32 nX, UINT32
 		@see PUC_GetXferDataSize
 		@see PUC_GetMaxXferDataSize
 	@~japanese
-		@brief ˆ³k‰æ‘œƒf[ƒ^‚ğDCTŒW”‚É“WŠJ‚µ‚Ü‚·B
-		@param[out] pDst “WŠJæƒoƒbƒtƒ@B‰¡•‚Í4‚Ì”{”‚ÉØ‚èã‚°‚½ƒTƒCƒY•ªŠm•Û‚³‚ê‚Ä‚¢‚é•K—v‚ª‚ ‚è‚Ü‚·Bi—áF‰¡•‚ª1246px‚Ìê‡Aƒoƒbƒtƒ@‚Í1248ƒoƒCƒgŠm•Û‚³‚ê‚Ä‚¢‚é•K—v‚ ‚èj
-		@param[in] nX “WŠJŠJn‚·‚é¶ãÀ•WXB0‚à‚µ‚­‚Í8‚Ì”{”‚Å‚ ‚é•K—v‚ª‚ ‚è‚Ü‚·B
-		@param[in] nY “WŠJŠJn‚·‚é¶ãÀ•WYB0‚à‚µ‚­‚Í8‚Ì”{”‚Å‚ ‚é•K—v‚ª‚ ‚è‚Ü‚·B
-		@param[in] nWidth “WŠJ‚·‚é‰¡•
-		@param[in] nHeight “WŠJ‚·‚é‚‚³
-		@param[in] nLineBytes “WŠJæƒoƒbƒtƒ@‚Ì‰¡•‚ÌƒoƒCƒg”
-		@param[in] pSrc ˆ³k‰æ‘œƒf[ƒ^
-		@param[in] pQVals —Êq‰»ƒe[ƒuƒ‹
-		@return ¬Œ÷‚ÍPUC_SUCCEEDEDA¸”s‚Í‚»‚êˆÈŠO‚ª•Ô‚è‚Ü‚·B
-		@note –{ŠÖ”‚ÍƒXƒŒƒbƒhƒZ[ƒt‚Å‚·B–{ŠÖ”‚Í•À—ñÀs‚ª‰Â”\‚Å‚·B
+		@brief åœ§ç¸®ç”»åƒãƒ‡ãƒ¼ã‚¿ã‚’DCTä¿‚æ•°ã«å±•é–‹ã—ã¾ã™ã€‚
+		@param[out] pDst å±•é–‹å…ˆãƒãƒƒãƒ•ã‚¡ã€‚æ¨ªå¹…ã¯4ã®å€æ•°ã«åˆ‡ã‚Šä¸Šã’ãŸã‚µã‚¤ã‚ºåˆ†ç¢ºä¿ã•ã‚Œã¦ã„ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚ï¼ˆä¾‹ï¼šæ¨ªå¹…ãŒ1246pxã®å ´åˆã€ãƒãƒƒãƒ•ã‚¡ã¯1248ãƒã‚¤ãƒˆç¢ºä¿ã•ã‚Œã¦ã„ã‚‹å¿…è¦ã‚ã‚Šï¼‰
+		@param[in] nX å±•é–‹é–‹å§‹ã™ã‚‹å·¦ä¸Šåº§æ¨™Xã€‚0ã‚‚ã—ãã¯8ã®å€æ•°ã§ã‚ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚
+		@param[in] nY å±•é–‹é–‹å§‹ã™ã‚‹å·¦ä¸Šåº§æ¨™Yã€‚0ã‚‚ã—ãã¯8ã®å€æ•°ã§ã‚ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚
+		@param[in] nWidth å±•é–‹ã™ã‚‹æ¨ªå¹…
+		@param[in] nHeight å±•é–‹ã™ã‚‹é«˜ã•
+		@param[in] nLineBytes å±•é–‹å…ˆãƒãƒƒãƒ•ã‚¡ã®æ¨ªå¹…ã®ãƒã‚¤ãƒˆæ•°
+		@param[in] pSrc åœ§ç¸®ç”»åƒãƒ‡ãƒ¼ã‚¿
+		@param[in] pQVals é‡å­åŒ–ãƒ†ãƒ¼ãƒ–ãƒ«
+		@return æˆåŠŸæ™‚ã¯PUC_SUCCEEDEDã€å¤±æ•—æ™‚ã¯ãã‚Œä»¥å¤–ãŒè¿”ã‚Šã¾ã™ã€‚
+		@note æœ¬é–¢æ•°ã¯ã‚¹ãƒ¬ãƒƒãƒ‰ã‚»ãƒ¼ãƒ•ã§ã™ã€‚æœ¬é–¢æ•°ã¯ä¸¦åˆ—å®Ÿè¡ŒãŒå¯èƒ½ã§ã™ã€‚
 		@see PUC_GetXferDataSize
 		@see PUC_GetMaxXferDataSize
 */
@@ -180,15 +182,15 @@ DLL_EXPORT PUCRESULT WINAPI DecodeDCTData(PINT16 pDst, UINT32 nX, UINT32 nY, UIN
 		@see PUC_GetXferDataSize
 		@see PUC_GetMaxXferDataSize
 	@~japanese
-		@brief ˆ³k‰æ‘œƒf[ƒ^‚ÌDC¬•ª‚ğ“WŠJ‚µ‚Ü‚·B
-		@param[out] pDst “WŠJæƒoƒbƒtƒ@BƒfƒR[ƒh”ÍˆÍ‚ÉŠÜ‚Ü‚ê‚éƒuƒƒbƒN‚Ì‘”‚¾‚¯Šm•Û‚·‚é•K—v‚ª‚ ‚è‚Ü‚·B
-		@param[in] nBlockX “WŠJŠJn‚·‚éƒuƒƒbƒNÀ•WXB
-		@param[in] nBlockY “WŠJŠJn‚·‚éƒuƒƒbƒNÀ•WYB
-		@param[in] nBlockCountX “WŠJ‚·‚éX•ûŒü‚ÌƒuƒƒbƒN”
-		@param[in] nBlockCountY “WŠJ‚·‚éY•ûŒü‚ÌƒuƒƒbƒN”
-		@param[in] pSrc ˆ³k‰æ‘œƒf[ƒ^
-		@return ¬Œ÷‚ÍPUC_SUCCEEDEDA¸”s‚Í‚»‚êˆÈŠO‚ª•Ô‚è‚Ü‚·B
-		@note –{ŠÖ”‚ÍƒXƒŒƒbƒhƒZ[ƒt‚Å‚·B–{ŠÖ”‚Í•À—ñÀs‚ª‰Â”\‚Å‚·B
+		@brief åœ§ç¸®ç”»åƒãƒ‡ãƒ¼ã‚¿ã®DCæˆåˆ†ã‚’å±•é–‹ã—ã¾ã™ã€‚
+		@param[out] pDst å±•é–‹å…ˆãƒãƒƒãƒ•ã‚¡ã€‚ãƒ‡ã‚³ãƒ¼ãƒ‰ç¯„å›²ã«å«ã¾ã‚Œã‚‹ãƒ–ãƒ­ãƒƒã‚¯ã®ç·æ•°ã ã‘ç¢ºä¿ã™ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚
+		@param[in] nBlockX å±•é–‹é–‹å§‹ã™ã‚‹ãƒ–ãƒ­ãƒƒã‚¯åº§æ¨™Xã€‚
+		@param[in] nBlockY å±•é–‹é–‹å§‹ã™ã‚‹ãƒ–ãƒ­ãƒƒã‚¯åº§æ¨™Yã€‚
+		@param[in] nBlockCountX å±•é–‹ã™ã‚‹Xæ–¹å‘ã®ãƒ–ãƒ­ãƒƒã‚¯æ•°
+		@param[in] nBlockCountY å±•é–‹ã™ã‚‹Yæ–¹å‘ã®ãƒ–ãƒ­ãƒƒã‚¯æ•°
+		@param[in] pSrc åœ§ç¸®ç”»åƒãƒ‡ãƒ¼ã‚¿
+		@return æˆåŠŸæ™‚ã¯PUC_SUCCEEDEDã€å¤±æ•—æ™‚ã¯ãã‚Œä»¥å¤–ãŒè¿”ã‚Šã¾ã™ã€‚
+		@note æœ¬é–¢æ•°ã¯ã‚¹ãƒ¬ãƒƒãƒ‰ã‚»ãƒ¼ãƒ•ã§ã™ã€‚æœ¬é–¢æ•°ã¯ä¸¦åˆ—å®Ÿè¡ŒãŒå¯èƒ½ã§ã™ã€‚
 		@see PUC_GetXferDataSize
 		@see PUC_GetMaxXferDataSize
 */
@@ -196,77 +198,91 @@ DLL_EXPORT PUCRESULT WINAPI DecodeDCData(PUINT8 pDst, UINT32 nBlockX, UINT32 nBl
 
 /*!
 	@~english
-		@brief
-		@return
+		@brief This retrieves whether the PC is capable of GPU processing.
+		@return Returns PUC_SUCCEEDED if GPU processing is possible, otherwise returns PUC_ERROR_NOTSUPPORT.
 	@~japanese
-		@brief PC‚ªGPUˆ—‰Â”\‚©‚ğæ“¾‚µ‚Ü‚·B
-		@return GPUˆ—‰Â”\‚Å‚ ‚ê‚ÎPUC_SUCEEDED, •s‰Â”\‚Å‚ ‚ê‚ÎPUC_ERROR_NOTSUPPORT‚ª•Ô‚è‚Ü‚·B
+		@brief PCãŒGPUå‡¦ç†å¯èƒ½ã‹ã‚’å–å¾—ã—ã¾ã™ã€‚
+		@return GPUå‡¦ç†å¯èƒ½ã§ã‚ã‚Œã°PUC_SUCEEDED, ä¸å¯èƒ½ã§ã‚ã‚Œã°PUC_ERROR_NOTSUPPORTãŒè¿”ã‚Šã¾ã™ã€‚
 */
 DLL_EXPORT PUCRESULT WINAPI GetAvailableGPUProcess();
 
 /*!
 	@~english
-		@brief
-		@return
+		@brief Allocates memory for GPU processing.
+		@param[in] param This is a configuration parameter.
+		@return If successful, PUC_SUCCEEDED will be returned. If failed, other responses will be returned.
 	@~japanese
-		@brief GPUˆ—‚Åg—p‚·‚éƒƒ‚ƒŠ‚ğŠm•Û‚µ‚Ü‚·B
-		@param[in] param ‰Šú‰»ƒpƒ‰ƒ[ƒ^‚Å‚·B
-		@return ¬Œ÷‚ÍPUC_SUCCEEDEDA¸”s‚Í‚»‚êˆÈŠO‚ª•Ô‚è‚Ü‚·B
+		@brief GPUå‡¦ç†ã§ä½¿ç”¨ã™ã‚‹ãƒ¡ãƒ¢ãƒªã‚’ç¢ºä¿ã—ã¾ã™ã€‚
+		@param[in] param è¨­å®šãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã§ã™ã€‚
+		@return æˆåŠŸæ™‚ã¯PUC_SUCCEEDEDã€å¤±æ•—æ™‚ã¯ãã‚Œä»¥å¤–ãŒè¿”ã‚Šã¾ã™ã€‚
 */
 DLL_EXPORT PUCRESULT WINAPI SetupGPUDecode(PUC_GPU_SETUP_PARAM param);
 
 /*!
 	@~english
-		@brief
-		@return
+		@brief Releases memory used by GPU processing.
+		@return If successful, PUC_SUCCEEDED will be returned. If failed, other responses will be returned.
+		@note It is safe to run after releasing the buffer used for PUC_DecodeGPU.
 	@~japanese
-		@brief GPUˆ—‚Åg—p‚µ‚½ƒƒ‚ƒŠ‚ğ‰ğ•ú‚µ‚Ü‚·B
-		@return ¬Œ÷‚ÍPUC_SUCCEEDEDA¸”s‚Í‚»‚êˆÈŠO‚ª•Ô‚è‚Ü‚·B
-        @note DecodeGPU‚Ég—p‚µ‚½ƒoƒbƒtƒ@‚ğ‰ğ•úŒã‚ÉÀs‚µ‚Ä‚à–â‘è‚ ‚è‚Ü‚¹‚ñB
+		@brief GPUå‡¦ç†ã§ä½¿ç”¨ã—ãŸãƒ¡ãƒ¢ãƒªã‚’è§£æ”¾ã—ã¾ã™ã€‚
+		@return æˆåŠŸæ™‚ã¯PUC_SUCCEEDEDã€å¤±æ•—æ™‚ã¯ãã‚Œä»¥å¤–ãŒè¿”ã‚Šã¾ã™ã€‚
+		@note PUC_DecodeGPUã«ä½¿ç”¨ã—ãŸãƒãƒƒãƒ•ã‚¡ã‚’è§£æ”¾å¾Œã«å®Ÿè¡Œã—ã¦ã‚‚å•é¡Œã‚ã‚Šã¾ã›ã‚“ã€‚
 */
 DLL_EXPORT PUCRESULT WINAPI TeardownGPUDecode();
 
 /*!
 	@~english
-		@brief
-		@return
+		@brief This unpacks the compressed image data to luminance data.(GPU processing)
+		@param[in] download If false is specified, the decoded data is stored in device (GPU) memory; if true is specified, it is stored in host (CPU) memory.
+		@param[in] pSrc The original encoded frame data to be decoded.
+		@param[out] pDst The decoded processing result frame data, which is output to device memory or host memory depending on the setting of the download argument.
+		@param[in] lineBytes The number of bytes of the buffer width at the unpacking destination
+		@n If the download argument is true, the data decoded by the GPU is copied to the address specified by this argument.
+		@n Therefore, it is necessary to allocate a buffer in host memory in advance.
+		@n The size of the width must be allocated rounded up to a multiple of four. (e.g., If the width is 1246 px, a buffer is required 1248 bytes at least)
+		@n If the download argument is false, the address of the device memory of the data decoded by the GPU is acquired. Allocation of host memory is not required.
+		@return If successful, PUC_SUCCEEDED will be returned. If failed, other responses will be returned.
 	@~japanese
-		@brief ˆ³k‰æ‘œƒf[ƒ^‚ğ‹P“x’lƒf[ƒ^‚É“WŠJ‚µ‚Ü‚·B(GPUg—p)
-		@param[in] download false‚ğw’è‚µ‚½ê‡ƒfƒR[ƒh‚³‚ê‚½ƒf[ƒ^‚ÍƒfƒoƒCƒX(GPU)ƒƒ‚ƒŠ‚É•Û‘¶‚³‚êAtrue‚Ìê‡‚ÍƒzƒXƒg(CPU)ƒƒ‚ƒŠ‚É•Û‘¶‚³‚ê‚Ü‚·B
-		@param[in] pSrc ƒfƒR[ƒh‘ÎÛ‚ÌƒGƒ“ƒR[ƒh‚³‚ê‚½Œ³‚ÌƒtƒŒ[ƒ€ƒf[ƒ^‚Å‚·B
-		@param[in] pDst ƒfƒR[ƒh‚³‚ê‚½ˆ—Œ‹‰Ê‚ÌƒtƒŒ[ƒ€ƒf[ƒ^‚Å‚·Bdownloadˆø”‚Ìİ’è‚É‚æ‚Á‚ÄƒfƒoƒCƒXƒƒ‚ƒŠ‚Ü‚½‚ÍƒzƒXƒgƒƒ‚ƒŠ‚Éo—Í‚³‚ê‚Ü‚·B
-		@n downloadˆø”‚ªtrue‚Ìê‡AGPU‚ÅƒfƒR[ƒh‚³‚ê‚½ƒf[ƒ^‚ğ‚±‚Ìˆø”‚Åw’è‚³‚ê‚½ƒAƒhƒŒƒX‚ÉƒRƒs[‚µ‚Ü‚·B‚»‚Ì‚½‚ß–‘O‚ÉƒzƒXƒgƒƒ‚ƒŠ‚Ìƒoƒbƒtƒ@‚ÌŠm•Û‚ª•K—v‚Å‚·B
-		@n ‰¡•‚Í4‚Ì”{”‚ÉØ‚èã‚°‚½ƒTƒCƒY•ªŠm•Û‚³‚ê‚Ä‚¢‚é•K—v‚ª‚ ‚è‚Ü‚·Bi—áF‰¡•‚ª1246px‚Ìê‡Aƒoƒbƒtƒ@‚Í1248ƒoƒCƒgŠm•Û‚³‚ê‚Ä‚¢‚é•K—v‚ ‚èj
-		@n downloadˆø”‚ªfalse‚Ìê‡AGPU‚ÅƒfƒR[ƒh‚³‚ê‚½ƒf[ƒ^‚ÌƒfƒoƒCƒXƒƒ‚ƒŠ‚ÌƒAƒhƒŒƒX‚ğæ“¾‚µ‚Ü‚·BƒzƒXƒgƒƒ‚ƒŠ‚ÌŠm•Û‚Í•s—v‚Å‚·B
-		@return ¬Œ÷‚ÍPUC_SUCCEEDEDA¸”s ‚Í‚»‚êˆÈŠO‚ª•Ô‚è‚Ü‚·B
+		@brief åœ§ç¸®ç”»åƒãƒ‡ãƒ¼ã‚¿ã‚’è¼åº¦å€¤ãƒ‡ãƒ¼ã‚¿ã«å±•é–‹ã—ã¾ã™ã€‚(GPUä½¿ç”¨)
+		@param[in] download falseã‚’æŒ‡å®šã—ãŸå ´åˆãƒ‡ã‚³ãƒ¼ãƒ‰ã•ã‚ŒãŸãƒ‡ãƒ¼ã‚¿ã¯ãƒ‡ãƒã‚¤ã‚¹(GPU)ãƒ¡ãƒ¢ãƒªã«ä¿å­˜ã•ã‚Œã€trueã®å ´åˆã¯ãƒ›ã‚¹ãƒˆ(CPU)ãƒ¡ãƒ¢ãƒªã«ä¿å­˜ã•ã‚Œã¾ã™ã€‚
+		@param[in] pSrc ãƒ‡ã‚³ãƒ¼ãƒ‰å¯¾è±¡ã®ã‚¨ãƒ³ã‚³ãƒ¼ãƒ‰ã•ã‚ŒãŸå…ƒã®ãƒ•ãƒ¬ãƒ¼ãƒ ãƒ‡ãƒ¼ã‚¿ã§ã™ã€‚
+		@param[out] pDst ãƒ‡ã‚³ãƒ¼ãƒ‰ã•ã‚ŒãŸå‡¦ç†çµæœã®ãƒ•ãƒ¬ãƒ¼ãƒ ãƒ‡ãƒ¼ã‚¿ã§ã™ã€‚downloadå¼•æ•°ã®è¨­å®šã«ã‚ˆã£ã¦ãƒ‡ãƒã‚¤ã‚¹ãƒ¡ãƒ¢ãƒªã¾ãŸã¯ãƒ›ã‚¹ãƒˆãƒ¡ãƒ¢ãƒªã«å‡ºåŠ›ã•ã‚Œã¾ã™ã€‚
+		@param[in] lineBytes å±•é–‹å…ˆãƒãƒƒãƒ•ã‚¡ã®æ¨ªå¹…ã®ãƒã‚¤ãƒˆæ•°
+		@n downloadå¼•æ•°ãŒtrueã®å ´åˆã€GPUã§ãƒ‡ã‚³ãƒ¼ãƒ‰ã•ã‚ŒãŸãƒ‡ãƒ¼ã‚¿ã‚’ã“ã®å¼•æ•°ã§æŒ‡å®šã•ã‚ŒãŸã‚¢ãƒ‰ãƒ¬ã‚¹ã«ã‚³ãƒ”ãƒ¼ã—ã¾ã™ã€‚ãã®ãŸã‚äº‹å‰ã«ãƒ›ã‚¹ãƒˆãƒ¡ãƒ¢ãƒªã®ãƒãƒƒãƒ•ã‚¡ã®ç¢ºä¿ãŒå¿…è¦ã§ã™ã€‚
+		@n æ¨ªå¹…ã¯4ã®å€æ•°ã«åˆ‡ã‚Šä¸Šã’ãŸã‚µã‚¤ã‚ºåˆ†ç¢ºä¿ã•ã‚Œã¦ã„ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚ï¼ˆä¾‹ï¼šæ¨ªå¹…ãŒ1246pxã®å ´åˆã€ãƒãƒƒãƒ•ã‚¡ã¯1248ãƒã‚¤ãƒˆç¢ºä¿ã•ã‚Œã¦ã„ã‚‹å¿…è¦ã‚ã‚Šï¼‰
+		@n downloadå¼•æ•°ãŒfalseã®å ´åˆã€GPUã§ãƒ‡ã‚³ãƒ¼ãƒ‰ã•ã‚ŒãŸãƒ‡ãƒ¼ã‚¿ã®ãƒ‡ãƒã‚¤ã‚¹ãƒ¡ãƒ¢ãƒªã®ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’å–å¾—ã—ã¾ã™ã€‚ãƒ›ã‚¹ãƒˆãƒ¡ãƒ¢ãƒªã®ç¢ºä¿ã¯ä¸è¦ã§ã™ã€‚
+		@return æˆåŠŸæ™‚ã¯PUC_SUCCEEDEDã€å¤±æ•—æ™‚ã¯ãã‚Œä»¥å¤–ãŒè¿”ã‚Šã¾ã™ã€‚
 */
 DLL_EXPORT PUCRESULT WINAPI DecodeGPU(bool download, unsigned char* pSrc, unsigned char** pDst, UINT32 lineBytes);
 
 /*!
 	@~english
-		@brief
-		@return
+		@brief This retrieves the error code from the last GPU processing.
+		@param[out] The error code from GPU.
+		@return If successful, PUC_SUCCEEDED will be returned. If failed, other responses will be returned.
 	@~japanese
-		@brief ÅŒã‚É”­¶‚µ‚½GPUˆ—‚Å‚ÌƒGƒ‰[ƒR[ƒh‚ğæ“¾‚µ‚Ü‚·B
-		@param[in] errorCode ƒGƒ‰[ƒR[ƒh‚Å‚·B
-		@return ¬Œ÷‚ÍPUC_SUCCEEDEDA¸”s‚Í‚»‚êˆÈŠO‚ª•Ô‚è‚Ü‚·B
+		@brief æœ€å¾Œã«ç™ºç”Ÿã—ãŸGPUå‡¦ç†ã§ã®ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰ã‚’å–å¾—ã—ã¾ã™ã€‚
+		@param[out] errorCode ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰ã§ã™ã€‚
+		@return æˆåŠŸæ™‚ã¯PUC_SUCCEEDEDã€å¤±æ•—æ™‚ã¯ãã‚Œä»¥å¤–ãŒè¿”ã‚Šã¾ã™ã€‚
 */
 DLL_EXPORT PUCRESULT WINAPI GetGPULastError(int& errorCode);
 
 /*!
 	@~english
-		@brief
-		@return
+		@brief This retrieves whether GPU decode memory is allocated.
+		@param[out] status true : allocated, false : not allocated.
+		@return If successful, PUC_SUCCEEDED will be returned. If failed, other responses will be returned.
 	@~japanese
-		@brief GPUƒfƒR[ƒh‚Ìƒƒ‚ƒŠ‚ªŠm•Û‚ª‚³‚ê‚Ä‚¢‚é‚©‚ğæ“¾‚µ‚Ü‚·B
-		@param[in] status trueFŠm•ÛÏ‚İAfalseFŠm•Û‚³‚ê‚Ä‚¢‚È‚¢
-		@return ¬Œ÷‚ÍPUC_SUCCEEDEDA¸”s‚Í‚»‚êˆÈŠO‚ª•Ô‚è‚Ü‚·B
+		@brief GPUãƒ‡ã‚³ãƒ¼ãƒ‰ã®ãƒ¡ãƒ¢ãƒªãŒç¢ºä¿ãŒã•ã‚Œã¦ã„ã‚‹ã‹ã‚’å–å¾—ã—ã¾ã™ã€‚
+		@param[out] status trueï¼šç¢ºä¿æ¸ˆã¿ã€falseï¼šç¢ºä¿ã•ã‚Œã¦ã„ãªã„
+		@return æˆåŠŸæ™‚ã¯PUC_SUCCEEDEDã€å¤±æ•—æ™‚ã¯ãã‚Œä»¥å¤–ãŒè¿”ã‚Šã¾ã™ã€‚
 */
 DLL_EXPORT PUCRESULT WINAPI IsSetupGPUDecode(bool& status);
 
+} // namespace pucutil
+
 #ifdef __cplusplus
 } // extern C
-} // namespace pucutil
 #endif
 
 #endif //__PUCUTIL_H

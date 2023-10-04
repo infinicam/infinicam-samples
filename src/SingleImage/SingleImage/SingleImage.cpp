@@ -56,7 +56,7 @@ void SaveSingleImage(PUC_HANDLE hDevice)
 	USHORT q[PUC_Q_COUNT];
 	UINT8* pDecodeBuf = NULL;
 
-	result = PUC_GetXferDataSize(hDevice, PUC_DATA_COMPRESSED, &nDataSize);
+	result = PUC_GetXferDataSize(hDevice, &nDataSize);
 	if (PUC_CHK_FAILED(result))
 	{
 		_tprintf(_T("PUC_GetXferDataSize error:%u\n"), result);
@@ -158,13 +158,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	if (PUC_CHK_FAILED(result))
 	{
 		_tprintf(_T("PUC_SetResolution error:%u\n"), result);
-		goto EXIT_LABEL;
-	}
-
-	result = PUC_SetXferDataMode(hDevice, PUC_DATA_COMPRESSED);
-	if (PUC_CHK_FAILED(result))
-	{
-		_tprintf(_T("PUC_SetXferDataMode error:%u\n"), result);
 		goto EXIT_LABEL;
 	}
 

@@ -16,6 +16,7 @@
 #include <string>
 #include <mutex>
 #include "PUCLIB.h"
+#include "PUCUTIL.h"
 
 // Use Multithread
 #define USE_DECODE_MULITHRREAD
@@ -358,7 +359,7 @@ namespace photron {
 				std::lock_guard<std::mutex> guard(m_mutex);
 				readBuffer = m_readBuffer[index];
 				
-				memcpy(pDecodeBuf[copyBuffer], pDecodeBuf[readBuffer], int(nLineBytes) * int(nHeight));
+				memcpy(pDecodeBuf[copyBuffer], pDecodeBuf[readBuffer], nLineBytes * nHeight);
 
 				readBuffer = copyBuffer;
 			}
@@ -680,6 +681,107 @@ namespace photron {
 
 		/*!
 			@~english
+				@brief This retrieves whether the PC is capable of GPU processing.
+				@return Returns PUC_SUCCEEDED if GPU processing is possible, otherwise returns PUC_ERROR_NOTSUPPORT.
+			@~japanese
+				@brief PCがGPU処理可能かを取得します。
+				@return GPU処理可能であればPUC_SUCEEDED, 不可能であればPUC_ERROR_NOTSUPPORTが返ります。
+		*/
+		PUCRESULT getAvailableGPUProcess()
+		{
+			return PUC_GetAvailableGPUProcess();
+		}
+
+		/*!
+			@~english
+				@brief Allocates memory for GPU processing.
+				@param[in] param This is a configuration parameter.
+				@return If successful, PUC_SUCCEEDED will be returned. If failed, other responses will be returned.
+			@~japanese
+				@brief GPU処理で使用するメモリを確保します。
+				@param[in] param 設定パラメータです。
+				@return 成功時はPUC_SUCCEEDED、失敗時はそれ以外が返ります。
+		*/
+		PUCRESULT setupGPUDecode(PUC_GPU_SETUP_PARAM param)
+		{
+			return PUC_SetupGPUDecode(param);
+		}
+
+		/*!
+			@~english
+				@brief Releases memory used by GPU processing.
+				@return If successful, PUC_SUCCEEDED will be returned. If failed, other responses will be returned.
+				@note It is safe to run after releasing the buffer used for PUC_DecodeGPU.
+			@~japanese
+				@brief GPU処理で使用したメモリを解放します。
+				@return 成功時はPUC_SUCCEEDED、失敗時はそれ以外が返ります。
+				@note PUC_DecodeGPUに使用したバッファを解放後に実行しても問題ありません。
+		*/
+		PUCRESULT tearDownGPUDecode()
+		{
+			return PUC_TeardownGPUDecode();
+		}
+
+		/*!
+			@~english
+				@brief This unpacks the compressed image data to luminance data.(GPU processing)
+				@param[in] download If false is specified, the decoded data is stored in device (GPU) memory; if true is specified, it is stored in host (CPU) memory.
+				@param[in] pSrc The original encoded frame data to be decoded.
+				@param[out] pDst The decoded processing result frame data, which is output to device memory or host memory depending on the setting of the download argument.
+				@param[in] lineBytes The number of bytes of the buffer width at the unpacking destination
+				@n If the download argument is true, the data decoded by the GPU is copied to the address specified by this argument.
+				@n Therefore, it is necessary to allocate a buffer in host memory in advance.
+				@n The size of the width must be allocated rounded up to a multiple of four. (e.g., If the width is 1246 px, a buffer is required 1248 bytes at least)
+				@n If the download argument is false, the address of the device memory of the data decoded by the GPU is acquired. Allocation of host memory is not required.
+				@return If successful, PUC_SUCCEEDED will be returned. If failed, other responses will be returned.
+			@~japanese
+				@brief 圧縮画像データを輝度値データに展開します。(GPU使用)
+				@param[in] download falseを指定した場合デコードされたデータはデバイス(GPU)メモリに保存され、trueの場合はホスト(CPU)メモリに保存されます。
+				@param[in] pSrc デコード対象のエンコードされた元のフレームデータです。
+				@param[out] pDst デコードされた処理結果のフレームデータです。download引数の設定によってデバイスメモリまたはホストメモリに出力されます。
+				@param[in] lineBytes 展開先バッファの横幅のバイト数
+				@n download引数がtrueの場合、GPUでデコードされたデータをこの引数で指定されたアドレスにコピーします。そのため事前にホストメモリのバッファの確保が必要です。
+				@n 横幅は4の倍数に切り上げたサイズ分確保されている必要があります。（例：横幅が1246pxの場合、バッファは1248バイト確保されている必要あり）
+				@n download引数がfalseの場合、GPUでデコードされたデータのデバイスメモリのアドレスを取得します。ホストメモリの確保は不要です。
+				@return 成功時はPUC_SUCCEEDED、失敗時はそれ以外が返ります。
+		*/
+		PUCRESULT decodeGPU(bool download, unsigned char* pSrc, unsigned char** pDst, UINT32 lineBytes)
+		{
+			return PUC_DecodeGPU(download, pSrc, pDst, lineBytes);
+		}
+
+		/*!
+			@~english
+				@brief This retrieves the error code from the last GPU processing.
+				@param[out] The error code from GPU.
+				@return If successful, PUC_SUCCEEDED will be returned. If failed, other responses will be returned.
+			@~japanese
+				@brief 最後に発生したGPU処理でのエラーコードを取得します。
+				@param[out] errorCode エラーコードです。
+				@return 成功時はPUC_SUCCEEDED、失敗時はそれ以外が返ります。
+		*/
+		PUCRESULT getGPULastError(int& errorCode)
+		{
+			return PUC_GetGPULastError(errorCode);
+		}
+
+		/*!
+			@~english
+				@brief This retrieves whether GPU decode memory is allocated.
+				@param[out] status true : allocated, false : not allocated.
+				@return If successful, PUC_SUCCEEDED will be returned. If failed, other responses will be returned.
+			@~japanese
+				@brief GPUデコードのメモリが確保がされているかを取得します。
+				@param[out] status true：確保済み、false：確保されていない
+				@return 成功時はPUC_SUCCEEDED、失敗時はそれ以外が返ります。
+		*/
+		PUCRESULT isSetupGPUDecode(bool& status)
+		{
+			return PUC_IsSetupGPUDecode(status);
+		}
+
+		/*!
+			@~english
 				@brief Saves image to a BMP file
 				@details Utility function to save the image buffer to a filen
 				@param[in] fileName The output file name
@@ -822,7 +924,7 @@ namespace photron {
 				std::lock_guard<std::mutex> guard(m_mutex);
 				readBuffer = m_readBuffer[index];
 
-				memcpy(pDecodeBufProxy[copyBuffer], pDecodeBufProxy[readBuffer], int(nBlockCountX) * int(nBlockCountY));
+				memcpy(pDecodeBufProxy[copyBuffer], pDecodeBufProxy[readBuffer], nBlockCountX * nBlockCountY);
 
 				readBuffer = copyBuffer;
 			}

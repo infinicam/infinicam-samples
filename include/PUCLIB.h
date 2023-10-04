@@ -2,18 +2,19 @@
 #define __PUCLIB_H
 
 #include "PUCCONST.h"
+#include "PUCUTIL.h"
 
 /*! 
 	@mainpage
 	@~english
 		@brief This SDK is a Windows-compatible library that controls the PHOTRON high-speed camera "INFINICAM" from a PC.@n
 			See the quick manual for basic usage of this SDK. This reference describes all available constants, enumerations, structures, and functions.
-	@copyright Copyright (C) 2022 PHOTRON LIMITED
+	@copyright Copyright (C) 2023 PHOTRON LIMITED
 
 	@~japanese
 		@brief 本SDKは、フォトロン高速度カメラ「INFINICAM」をPCからコントロールするWindows専用のライブラリです。@n
 			SDKの基本的な使い方はクイックマニュアルをご覧ください。本資料では、利用可能な全ての定数、列挙体、構造体、関数について記載しています。
-	@copyright Copyright (C) 2022 PHOTRON LIMITED
+	@copyright Copyright (C) 2023 PHOTRON LIMITED
 */
 
 #ifdef	__cplusplus
@@ -101,7 +102,6 @@ typedef struct
 	@~japanese @brief 連続転送中に呼ばれるコールバック関数の型 */
 typedef void(*RECIEVE_CALLBACK)(PPUC_XFER_DATA_INFO, void*);
 
-extern struct PUC_GPU_SETUP_PARAM;
 
 /*!
 	@~english
@@ -244,12 +244,14 @@ PUCRESULT WINAPI PUC_GetDeviceVersion(PUC_HANDLE hDevice, UINT32* pVersion);
 		@param[out] pSerialNo The storage destination for the serial number
 		@return If successful, PUC_SUCCEEDED will be returned. If failed, other responses will be returned.
 		@note This function is thread-safe.
+		@n If the serial number of the camera starts with M, the value retreived by this API will be the number after M.
 	@~japanese
 		@brief デバイスのシリアル番号を取得します。
 		@param[in] hDevice 操作対象のデバイスハンドル
 		@param[out] pSerialNo シリアル番号の格納先
 		@return 成功時はPUC_SUCCEEDED、失敗時はそれ以外が返ります。
 		@note 本関数はスレッドセーフです。
+		@n シリアル番号がMから始まる機体について、本APIで取得する値はM以降の数字になります。
 */
 PUCRESULT WINAPI PUC_GetSerialNo(PUC_HANDLE hDevice, UINT64* pSerialNo);
 
@@ -1266,8 +1268,8 @@ PUCRESULT WINAPI PUC_ResetSequenceNo(PUC_HANDLE hDevice);
 
 /*!
 	@~english
-		@brief 
-		@return 
+		@brief This retrieves whether the PC is capable of GPU processing.
+		@return Returns PUC_SUCCEEDED if GPU processing is possible, otherwise returns PUC_ERROR_NOTSUPPORT.
 	@~japanese
 		@brief PCがGPU処理可能かを取得します。
 		@return GPU処理可能であればPUC_SUCEEDED, 不可能であればPUC_ERROR_NOTSUPPORTが返ります。
@@ -1276,8 +1278,9 @@ PUCRESULT WINAPI PUC_GetAvailableGPUProcess();
 
 /*!
 	@~english
-		@brief
-		@return
+		@brief Allocates memory for GPU processing.
+		@param[in] param This is a configuration parameter.
+		@return If successful, PUC_SUCCEEDED will be returned. If failed, other responses will be returned.
 	@~japanese
 		@brief GPU処理で使用するメモリを確保します。
 		@param[in] param 設定パラメータです。
@@ -1287,8 +1290,9 @@ PUCRESULT WINAPI PUC_SetupGPUDecode(PUC_GPU_SETUP_PARAM param);
 
 /*!
 	@~english
-		@brief
-		@return
+		@brief Releases memory used by GPU processing.
+		@return If successful, PUC_SUCCEEDED will be returned. If failed, other responses will be returned.
+		@note It is safe to run after releasing the buffer used for PUC_DecodeGPU.
 	@~japanese
 		@brief GPU処理で使用したメモリを解放します。
 		@return 成功時はPUC_SUCCEEDED、失敗時はそれ以外が返ります。
@@ -1298,38 +1302,49 @@ PUCRESULT WINAPI PUC_TeardownGPUDecode();
 
 /*!
 	@~english
-		@brief
-		@return
+		@brief This unpacks the compressed image data to luminance data.(GPU processing)
+		@param[in] download If false is specified, the decoded data is stored in device (GPU) memory; if true is specified, it is stored in host (CPU) memory.
+		@param[in] pSrc The original encoded frame data to be decoded.
+		@param[out] pDst The decoded processing result frame data, which is output to device memory or host memory depending on the setting of the download argument.
+		@param[in] lineBytes The number of bytes of the buffer width at the unpacking destination
+		@n If the download argument is true, the data decoded by the GPU is copied to the address specified by this argument.
+		@n Therefore, it is necessary to allocate a buffer in host memory in advance.
+		@n The size of the width must be allocated rounded up to a multiple of four. (e.g., If the width is 1246 px, a buffer is required 1248 bytes at least)
+		@n If the download argument is false, the address of the device memory of the data decoded by the GPU is acquired. Allocation of host memory is not required.
+		@return If successful, PUC_SUCCEEDED will be returned. If failed, other responses will be returned.
 	@~japanese
 		@brief 圧縮画像データを輝度値データに展開します。(GPU使用)
 		@param[in] download falseを指定した場合デコードされたデータはデバイス(GPU)メモリに保存され、trueの場合はホスト(CPU)メモリに保存されます。
         @param[in] pSrc デコード対象のエンコードされた元のフレームデータです。
-        @param[in] pDst デコードされた処理結果のフレームデータです。download引数の設定によってデバイスメモリまたはホストメモリに出力されます。
+        @param[out] pDst デコードされた処理結果のフレームデータです。download引数の設定によってデバイスメモリまたはホストメモリに出力されます。
+		@param[in] lineBytes 展開先バッファの横幅のバイト数
 		@n download引数がtrueの場合、GPUでデコードされたデータをこの引数で指定されたアドレスにコピーします。そのため事前にホストメモリのバッファの確保が必要です。
 		@n 横幅は4の倍数に切り上げたサイズ分確保されている必要があります。（例：横幅が1246pxの場合、バッファは1248バイト確保されている必要あり）
 		@n download引数がfalseの場合、GPUでデコードされたデータのデバイスメモリのアドレスを取得します。ホストメモリの確保は不要です。
-		@return 成功時はPUC_SUCCEEDED、失敗 時はそれ以外が返ります。
+		@return 成功時はPUC_SUCCEEDED、失敗時はそれ以外が返ります。
 */
 PUCRESULT WINAPI PUC_DecodeGPU(bool download, unsigned char* pSrc, unsigned char** pDst, UINT32 lineBytes);
 
 /*!
 	@~english
-		@brief
-		@return
+		@brief This retrieves the error code from the last GPU processing.
+		@param[out] The error code from GPU.
+		@return If successful, PUC_SUCCEEDED will be returned. If failed, other responses will be returned.
 	@~japanese
 		@brief 最後に発生したGPU処理でのエラーコードを取得します。
-		@param[in] errorCode エラーコードです。
+		@param[out] errorCode エラーコードです。
 		@return 成功時はPUC_SUCCEEDED、失敗時はそれ以外が返ります。
 */
 PUCRESULT WINAPI PUC_GetGPULastError(int& errorCode);
 
 /*!
 	@~english
-		@brief
-		@return
+		@brief This retrieves whether GPU decode memory is allocated.
+		@param[out] status true : allocated, false : not allocated. 
+		@return If successful, PUC_SUCCEEDED will be returned. If failed, other responses will be returned.
 	@~japanese
 		@brief GPUデコードのメモリが確保がされているかを取得します。
-		@param[in] status true：確保済み、false：確保されていない
+		@param[out] status true：確保済み、false：確保されていない
 		@return 成功時はPUC_SUCCEEDED、失敗時はそれ以外が返ります。
 */
 PUCRESULT WINAPI PUC_IsSetupGPUDecode(bool& status);

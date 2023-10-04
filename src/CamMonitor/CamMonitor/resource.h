@@ -145,6 +145,8 @@
 #define IDC_RESET_SEQNO                 1055
 #define IDC_SYNC_IN_SIGNAL_POSI         1056
 #define IDC_SYNC_IN_SIGNAL_NEGA         1057
+#define IDC_DECODE_CPU					1058
+#define IDC_DECODE_GPU					1059
 #define ID_EDIT_ZOOM_IN                 32771
 #define ID_EDIT_ZOOM_OUT                32772
 #define ID_EDIT_ZOOM_FIT                32773

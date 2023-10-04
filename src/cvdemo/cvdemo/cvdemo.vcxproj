@@ -156,9 +156,9 @@
     <ClCompile Include="cvdemo.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\inc\PhotronVideoCapture.h" />
-    <ClInclude Include="..\..\..\inc\PUCLIB.h" />
-    <ClInclude Include="..\..\..\inc\PUCLib_Wrapper.h" />
+    <ClInclude Include="..\..\..\include\PhotronVideoCapture.h" />
+    <ClInclude Include="..\..\..\include\PUCLIB.h" />
+    <ClInclude Include="..\..\..\include\PUCLib_Wrapper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

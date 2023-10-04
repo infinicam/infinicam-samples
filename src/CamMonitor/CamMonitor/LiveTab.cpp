@@ -28,6 +28,8 @@ CLiveTab::CLiveTab(CWnd* pParent)
 	, m_xvExposeOff(0)
 	, m_csvFile(nullptr)
 	, m_mdatFile(nullptr)
+	, m_decodeMode(DECODE_CPU)
+	, m_enableDecodeGPU(FALSE)
 {
 }
 
@@ -58,6 +60,8 @@ void CLiveTab::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_DECODE_POS_Y, m_xvDecodePos.y);
 	DDX_Text(pDX, IDC_DECODE_POS_W, m_xvDecodeSize.cx);
 	DDX_Text(pDX, IDC_DECODE_POS_H, m_xvDecodeSize.cy);
+	DDX_Radio(pDX, IDC_DECODE_CPU, m_decodeMode);
+	//DDX_Radio(pDX, IDC_DECODE_GPU, m_decodeMode);
 }
 
 BOOL CLiveTab::OpenCamera(UINT32 nDeviceNo, UINT32 nSingleXferTimeOut, UINT32 nContinuousXferTimeOut, UINT32 nRingBufCount)
@@ -86,6 +90,24 @@ BOOL CLiveTab::OpenCamera(UINT32 nDeviceNo, UINT32 nSingleXferTimeOut, UINT32 nC
 		}
 	}
 
+	result = PUC_GetAvailableGPUProcess();
+	if (PUC_CHK_SUCCEEDED(result))
+	{
+		PUC_RESO_LIMIT_INFO info;
+		PUC_GetResolutionLimit(m_camera.GetHandle(), &info);
+
+		PUC_GPU_SETUP_PARAM param;
+		param.width = info.nMaxWidth;
+		param.height = info.nMaxHeight;
+
+		result = PUC_SetupGPUDecode(param);
+		if (PUC_CHK_SUCCEEDED(result))
+		{
+			m_enableDecodeGPU = TRUE;
+			OnBnClickedDecodeGPU();
+		}
+	}
+
 	m_camera.SetCallbackSingle(_SingleProc, this);
 	m_camera.SetCallbackContinuous(_ContinuousProc, this);
 	return TRUE;
@@ -95,6 +117,9 @@ void CLiveTab::CloseCamera()
 {
 	StopRec();
 	StopLive();
+
+	PUC_TeardownGPUDecode();
+
 	m_camera.CloseDevice();
 }
 
@@ -217,7 +242,7 @@ void CLiveTab::WriteCIH()
 	PUC_GetFramerateShutter(m_camera.GetHandle(), &cih.m_framerate, &cih.m_shutterFps);
 	PUC_GetExposeTime(m_camera.GetHandle(), &cih.m_exposeOn, &cih.m_exposeOff);
 	PUC_GetResolution(m_camera.GetHandle(), &cih.m_width, &cih.m_height);
-	PUC_GetXferDataSize(m_camera.GetHandle(), PUC_DATA_COMPRESSED, &cih.m_frameSize);
+	PUC_GetXferDataSize(m_camera.GetHandle(), &cih.m_frameSize);
 	cih.m_frameCount = m_nRecFrameCount;
 	memcpy(cih.m_quantization, m_camera.GetQuantization(), sizeof(cih.m_quantization));
 	cih.m_filetype = df.cameraSaveFileType;
@@ -235,15 +260,32 @@ void CLiveTab::DecodeImage(PUCHAR pBuffer)
 	// ***Lock***
 	CBitmapImage* pImage = (CBitmapImage*)m_lockImage.GetLockData();
 	pImage->FillBlack();
-	PUC_DecodeData(
-		pImage->GetBuffer() + (m_xvDecodePos.y * pImage->GetLineByte() + m_xvDecodePos.x),
-		m_xvDecodePos.x,
-		m_xvDecodePos.y,
-		m_xvDecodeSize.cx,
-		m_xvDecodeSize.cy,
-		pImage->GetLineByte(),
-		pBuffer,
-		m_camera.GetQuantization());
+
+	if (m_enableDecodeGPU && m_decodeMode == DECODE_GPU)
+	{
+		unsigned char* tmpDst = pImage->GetBuffer();
+		UINT32 w, h;
+		PUC_GetResolution(m_camera.GetHandle(), &w, &h);
+
+		auto result = PUC_DecodeGPU(
+			true,
+			pBuffer,
+			&tmpDst,
+			pImage->GetLineByte()
+		);
+	}
+	else if (m_decodeMode == DECODE_CPU) 
+	{
+		PUC_DecodeData(
+			pImage->GetBuffer() + (m_xvDecodePos.y * pImage->GetLineByte() + m_xvDecodePos.x),
+			m_xvDecodePos.x,
+			m_xvDecodePos.y,
+			m_xvDecodeSize.cx,
+			m_xvDecodeSize.cy,
+			pImage->GetLineByte(),
+			pBuffer,
+			m_camera.GetQuantization());
+	}
 
 	m_lockImage.Unlock();
 	// ***Unlock***
@@ -336,6 +378,16 @@ void CLiveTab::UpdateBuffer()
 	m_lockImage.SetHeight(h);
 	m_lockImage.SetColor(colorType != PUC_COLOR_MONO);
 	m_lockImage.Create();
+
+	if (m_enableDecodeGPU)
+	{
+		PUC_TeardownGPUDecode();
+
+		PUC_GPU_SETUP_PARAM param;
+		param.width = w;
+		param.height = h;
+		PUC_SetupGPUDecode(param);
+	}
 }
 
 void CLiveTab::UpdateControlState()
@@ -380,6 +432,9 @@ void CLiveTab::UpdateControlState()
 	GetDlgItem(IDC_SNAPSHOT)->EnableWindow(bOpened && !bContinuous);
 	GetDlgItem(IDC_SAVE_TO)->EnableWindow(bOpened && !bContinuous);
 	GetDlgItem(IDC_RESET_SEQNO)->EnableWindow(bOpened && !bContinuous);
+	GetDlgItem(IDC_DECODE_CPU)->EnableWindow(bOpened && !bContinuous);
+	GetDlgItem(IDC_DECODE_GPU)->EnableWindow(bOpened && !bContinuous && m_enableDecodeGPU);
+
 
 	// Record button color
 	if (bRecording)
@@ -718,6 +773,7 @@ void CLiveTab::UpdateLiveUI()
 }
 
 BEGIN_MESSAGE_MAP(CLiveTab, CBaseTab)
+
 	ON_MESSAGE(WM_INITDIALOG, OnInitDialog)
 	ON_WM_SHOWWINDOW()
 	ON_WM_DESTROY()
@@ -752,6 +808,9 @@ BEGIN_MESSAGE_MAP(CLiveTab, CBaseTab)
 	ON_BN_CLICKED(IDC_SNAPSHOT, &CLiveTab::OnBnClickedSnapshot)
 	ON_BN_CLICKED(IDC_SAVE_TO, &CLiveTab::OnBnClickedSaveTo)
 	ON_BN_CLICKED(IDC_RESET_SEQNO, &CLiveTab::OnBnClickedResetSeqNo)
+	ON_BN_CLICKED(IDC_DECODE_CPU, &CLiveTab::OnBnClickedDecodeCPU)
+	ON_BN_CLICKED(IDC_DECODE_GPU, &CLiveTab::OnBnClickedDecodeGPU)
+
 END_MESSAGE_MAP()
 
 LRESULT CLiveTab::OnInitDialog(WPARAM wParam, LPARAM lParam)
@@ -763,6 +822,8 @@ LRESULT CLiveTab::OnInitDialog(WPARAM wParam, LPARAM lParam)
 	UpdateControlState();
 
 	OnBnClickedAcquisitionSingle();
+	OnBnClickedDecodeCPU();
+
 	return FALSE;
 }
 
@@ -1301,4 +1362,26 @@ void CLiveTab::OnBnClickedResetSeqNo()
 		AfxMessageBox(IDS_ERROR_NOT_SUPPORTED, MB_OK | MB_ICONERROR);
 		return;
 	}
+}
+
+void CLiveTab::OnBnClickedDecodeCPU() 
+{
+	StopLive();
+
+	m_decodeMode = DECODE_CPU;
+	UpdateData(FALSE);
+
+	StartLive();
+	UpdateControlState();
+}
+
+void CLiveTab::OnBnClickedDecodeGPU()
+{
+	StopLive();
+
+	m_decodeMode = DECODE_GPU;
+	UpdateData(FALSE);
+
+	StartLive();
+	UpdateControlState();
 }

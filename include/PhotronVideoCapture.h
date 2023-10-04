@@ -122,7 +122,7 @@ namespace photron {
 		}
 
 		bool set(int propId, double value) {
-			cerr << "Not supported" << endl;
+			std::cerr << "Not supported" << std::endl;
 			return false;
 		}
 

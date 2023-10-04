@@ -48,6 +48,12 @@ typedef enum
 	IMAGE_QUALITY_HIGH = 2,
 } QUANTIZATION_MODE;
 
+typedef enum
+{
+	DECODE_CPU = 0,
+	DECODE_GPU = 1,
+} DECODE_MODE;
+
 // Macro
 #define GET_VIEW() (AfxGetMainWnd() ? ((CFrameWnd*)AfxGetMainWnd())->GetActiveView() : NULL);
 #define GET_ACTIVE_TAB() (AfxGetMainWnd() ? ((CMainFrame*)AfxGetMainWnd())->GetActiveTab() : NULL);
