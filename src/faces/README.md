@@ -401,13 +401,13 @@ The code above shows that it plays back the stored image with a facial rectangle
 - You can move the photo quickly to see if the detection continues to be stable.
 
 <section style="text-align: center;">
-<img src="image/staticmoving600.PNG" width="70%">
+<img src="image/staticmoving600.png" width="70%">
 </section>
 
 - If you do the same thing with the 30 fps camera, the detection fails when the object is moving because of the motion blur.
 
 <section style="text-align: center;">
-<img src="image/staticmoving.PNG" width="70%">
+<img src="image/staticmoving.png" width="70%">
 </section>
 
 - Next, simulate the passing train. Slide up the train picture until no faces show up in the monitor. 
@@ -419,7 +419,7 @@ The code above shows that it plays back the stored image with a facial rectangle
 - After the recording is finished, it goes to Playback mode that loop-plays the recorded result. Below are screenshot comparisons of 600 fps processing and the 30 fps processing.
 
 <section style="text-align: center;">
-<img src="image/recorded_comparison.PNG" width="90%">
+<img src="image/recorded_comparison.png" width="90%">
 </section>
 
 > The above operation example is done on a Laptop PC with the following specification:
