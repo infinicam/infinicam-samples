@@ -85,7 +85,7 @@ When re-saving, please use the Save combo box to change the format.
 
 When saving streaming, shot frames may be dropped due to the influence of SSD or PC specifications, etc. Here you can decide how to handle dropped frames when saving.
 
-* Non: Do nothing
+* none: Do nothing
 * black image: Insert a black image
 * pre-frame image: Insert the image of the pre-frame image
 
