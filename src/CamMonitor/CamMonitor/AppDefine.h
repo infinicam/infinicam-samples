@@ -7,6 +7,8 @@
 #define UPDATE_TEMP_INTERVAL	1000
 
 #define TIMER_ID_UPDATE_ANALYZE	1002
+#define TIMER_ID_UPDATE_RINGBUFFER 1003
+#define UPDATE_RINGBUFFER_INTERVAL 500
 #define UPDATE_ANALYZE_INTERVAL	500
 
 #define WM_USER_UPDATE_VIEW				(WM_USER + 101)
@@ -20,13 +22,30 @@
 #define REG_KEY_FILE_OPEN_FOLDER_PATH	_T("fileopenfolderpath")
 #define REG_KEY_FILE_SAVE_FOLDER_PATH	_T("filesavefolderpath")
 #define REG_KEY_FILE_SAVE_FILE_PATH		_T("filesavefilepath")
+#define REG_KEY_CAMERA_FRAMERATE_INDEX	_T("framerate")
+#define REG_KEY_CAMERA_RESOLUTION_INDEX	_T("resolution")
+#define REG_KEY_CAMERA_SHUTTER_INDEX	_T("shutterspeed")
+#define REG_KEY_LATEST_CIH_FULLPATH		_T("latestcihfullpath")
 
-#define DEFAULT_RING_BUF_COUNT	1024
+#define DEFAULT_RING_BUF_COUNT		1024
+#define DEFAULT_FRAMERATE_INDEX		8
+#define DEFAULT_SHUTTERSPEED_INDEX	0
+#define DEFAULT_RESOLUTION_INDEX	0
+
+#define MAX_SEQUENCE_NO	65535
+
+
 
 enum
 {
 	LIVE_MODE = 0,
 	FILE_MODE = 1,
+};
+
+enum
+{
+	TAB_LIVE = 0,
+	TAB_FILE = 1,
 };
 
 typedef enum
@@ -53,6 +72,14 @@ typedef enum
 	DECODE_CPU = 0,
 	DECODE_GPU = 1,
 } DECODE_MODE;
+
+enum
+{
+	RET_ERROR = 0,
+	RET_CONTINUE_NEXT_FRAME =1,
+	RET_CONTINUE_CURRENT_FRAME = 2,
+	RET_FINISH = 3,
+};
 
 // Macro
 #define GET_VIEW() (AfxGetMainWnd() ? ((CFrameWnd*)AfxGetMainWnd())->GetActiveView() : NULL);

@@ -42,7 +42,7 @@ public:
 	enum { IDD = IDD_OPERATION };
 
 	void AddTab(int nID, const CString& sTitle, CDialog* pTab);
-
+	CDialog* GetTab(int indexTab) { return m_tabCtrl.GetTab(indexTab); }
 	CDialog* GetActiveTab() const { return m_tabCtrl.GetCurrentTab(); }
 
 protected:

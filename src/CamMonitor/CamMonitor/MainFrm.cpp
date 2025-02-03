@@ -18,6 +18,7 @@ IMPLEMENT_DYNAMIC(CMainFrame, CFrameWnd)
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CREATE()
 	ON_WM_SETFOCUS()
+	ON_COMMAND_RANGE(ID_LANGUAGE_ENGLISH, ID_LANGUAGE_JAPANESE, &CMainFrame::OnLanguageChange)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -34,6 +35,25 @@ CMainFrame::CMainFrame()
 
 CMainFrame::~CMainFrame()
 {
+}
+
+void CMainFrame::OnLanguageChange(UINT nID)
+{
+	WORD langID;
+	if (nID == ID_LANGUAGE_ENGLISH)
+		langID = MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT);
+	else
+		langID = MAKELANGID(LANG_JAPANESE, SUBLANG_DEFAULT);
+
+	theApp.SetLanguage(langID);
+	auto liveTab = (CLiveTab*)m_wndTabDlgBar.GetTab(TAB_LIVE);
+	liveTab->setLanguage(langID);
+	auto fileTab = (CFileTab*)m_wndTabDlgBar.GetTab(TAB_LIVE);
+	fileTab->setLanguage(langID);
+
+	CString text;
+	text.LoadString(IDS_TEXT_LANGUAGE_CHANGE);
+	AfxMessageBox(text);
 }
 
 
@@ -75,16 +95,20 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;      // fail to create
 	}
 
+	auto langID = theApp.LoadLanguagePreference();
+
 	CLiveTab* pCameraTab = new CLiveTab(&m_wndTabDlgBar);
+	pCameraTab->setLanguage(langID);
 	m_wndTabDlgBar.AddTab(pCameraTab->IDD, pCameraTab->GetName(), pCameraTab);
 
 	CFileTab* pFileTab = new CFileTab(&m_wndTabDlgBar);
+	pFileTab->setLanguage(langID);
 	m_wndTabDlgBar.AddTab(pFileTab->IDD, pFileTab->GetName(), pFileTab);
 
 	m_wndTabDlgBar.SetBarStyle(m_wndTabDlgBar.GetBarStyle() | CBRS_FLOAT_MULTI);
 	m_wndTabDlgBar.EnableDocking(CBRS_ALIGN_RIGHT);
 	DockControlBar(&m_wndTabDlgBar);
-
+	
 	return 0;
 }
 

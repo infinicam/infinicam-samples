@@ -27,6 +27,8 @@ CCameraObject::CCameraObject()
 	, m_argContinuous(NULL)
 	, m_bufContinuous(0)
 	, m_pBuffer(NULL)
+	, m_xferDataSize(0)
+	, m_framerate(0)
 {
 	memset(m_baseQ, 0, sizeof(m_baseQ));
 	memset(m_q, 0, sizeof(m_q));
@@ -232,10 +234,6 @@ void CCameraObject::SingleAcquitisionThread()
 				m_cbSingle(&xferData, m_argSingle);
 		}
 		m_bufSingle.Unlock();
-		
-		string seqNo = "seqNo : " + std::to_string(xferData.nSequenceNo) + "\n";
-		//OutputDebugString(s2ws(seqNo).c_str());
-
 		// ***Unlock***
 
 		m_thInfo.preUpdateTime = nEndTime;
@@ -280,14 +278,24 @@ void CCameraObject::GetSingleImageEnd()
 	// ***Unlock***
 }
 
+UINT32 CCameraObject::getFramerate()
+{
+	UINT32 tmp;
+	PUC_GetFramerateShutter(m_hDevice, &m_framerate, &tmp);
+	return m_framerate;
+}
+
+UINT32 CCameraObject::getImageDataSize()
+{
+	PUC_GetXferDataSize(m_hDevice, &m_xferDataSize);
+	return m_xferDataSize;
+}
+
 void CCameraObject::_ContinuousCallback(PPUC_XFER_DATA_INFO pInfo, void* pArg)
 {
 	CCameraObject* pObj = (CCameraObject*)pArg;
 	pObj->ContinuousCallback(pInfo);
 }
-
-
-
 
 void CCameraObject::ContinuousCallback(PPUC_XFER_DATA_INFO pInfo)
 {
@@ -298,11 +306,6 @@ void CCameraObject::ContinuousCallback(PPUC_XFER_DATA_INFO pInfo)
 	xferData.pData = pBuffer;
 	xferData.nDataSize = pInfo->nDataSize;
 	xferData.nSequenceNo = pInfo->nSequenceNo;
-
-	
-	string seqNo = "seqNo : " + std::to_string(xferData.nSequenceNo) + "\n";
-	//OutputDebugString(s2ws(seqNo).c_str());
-	
 
 	if (m_cbContinuous)
 		m_cbContinuous(&xferData, m_argContinuous);

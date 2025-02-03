@@ -22,6 +22,11 @@ public:
 	CString fileOpenFolderPath;
 	CString fileSaveFolderPath;
 	CString fileSaveFileName;
+	CString latestSaveCIHFullPath;
+
+	int cameraFramerateIndex;
+	int cameraResolutionIndex;
+	int cameraShutterSpeedIndex;
 };
 
 class CCamMonitorApp : public CWinApp
@@ -34,8 +39,13 @@ public:
 
 	CDefaultParams& GetDefaultParams() { return m_dfParams; }
 
+	void SetLanguage(WORD langID);
+	void SaveLanguagePreference(LANGID langID);
+	WORD LoadLanguagePreference();
+
 private:
 	CDefaultParams m_dfParams;
+	WORD m_currentLangID;
 
 public:
 	afx_msg void OnAppAbout();

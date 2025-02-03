@@ -5,6 +5,27 @@
 #include "cih.h"
 #include "Bitmap.h"
 
+#include <opencv2/core.hpp>
+#include <opencv2/videoio.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+
+enum RESAVE_FORMAT
+{
+	RESAVE_FORMTT_RAW = 0,
+	RESAVE_FORMAT_AVI,
+	RESAVE_FORMAT_MP4,
+	RESAVE_FORMAT_BMP,
+};
+
+
+enum INTERPOLATE_FRAME
+{
+	INTERPOLATE_NONE = 0,
+	INTERPOLATE_BLACK,
+	INTERPOLATE_PREFRAME,
+};
+
 class CFileTab : public CBaseTab
 {
 public:
@@ -22,6 +43,13 @@ public:
 	virtual LockImage* GetLockImage() { return &m_lockImage; }
 	virtual LockBuffer* GetLockTextInfo() { return &m_lockTextInfo; }
 
+	void SetResaveStartFrame(int startFrame) { m_resaveStartFrame = startFrame; }
+	void SetResaveEndFrame(int endFrame) { m_resaveEndFrame = endFrame; }
+
+	void UpdateControlText();
+	void setLanguage(WORD langID) { m_langID = langID; }
+
+
 protected:
 	void UpdateControlState();
 
@@ -31,13 +59,20 @@ protected:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 
-	static UINT _SaveImage(INT64 nFrameNo, CWnd* pWnd);
+	static UINT _SaveImage(INT64 nFrameNo, INT64 nStartFrame, INT64 nEndFrame, CWnd* pWnd);
 	UINT SaveImage(INT64 nFrameNo);
+
+	static UINT _ResaveMovie(INT64 nFrameNo, INT64 nStartFrame, INT64 nEndFrame, CWnd* pWnd);
+	UINT ResaveMovie(INT64 nFrameNo);
+
+	static UINT _ResaveRawFile(INT64 nFrameNo, INT64 nStartFrame, INT64 nEndFrame, CWnd* pWnd);
+	UINT ResaveRawFile(INT64 nFrameNo);
 
 	BOOL SaveCSV(const CString& filePath);
 
 	BOOL OpenCIH(const CString& filePath);
 	void CloseCIH();
+	void WriteCIH();
 
 	BOOL OpenDataFile();
 	BOOL ReadDataFileAndDecode(UINT32 nFrameNo);
@@ -60,6 +95,21 @@ private:
 	int m_xvStartFrame;
 	int m_xvEndFrame;
 	CSliderCtrl m_sldrFrameCtrl;
+	CComboBox m_comboFormat;
+
+	cv::VideoWriter m_videoWriter;
+	BOOL m_isVideoWriterOpened;
+	int m_resaveStartFrame;
+	int m_resaveEndFrame;
+	int m_resaveFormat;
+	int m_interpolateFrame;
+	FILE* m_mdatFile;
+	cv::Mat m_preImage;
+	INT64 m_saveframeCount;
+	CString m_currentSaveFilePath;
+
+	WORD m_langID;
+
 
 public:
 	DECLARE_MESSAGE_MAP()

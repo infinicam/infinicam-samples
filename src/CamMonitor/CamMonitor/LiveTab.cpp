@@ -7,7 +7,10 @@
 #include "ChildView.h"
 #include "SelectCameraDialog.h"
 #include "SaveLiveDialog.h"
+#include "ProgressDialog.h"
 #include "Util.h"
+
+#pragma comment(lib, "SetupAPI.lib")
 
 IMPLEMENT_DYNAMIC(CLiveTab, CBaseTab)
 
@@ -30,6 +33,10 @@ CLiveTab::CLiveTab(CWnd* pParent)
 	, m_mdatFile(nullptr)
 	, m_decodeMode(DECODE_CPU)
 	, m_enableDecodeGPU(FALSE)
+	, m_filepath("")
+	, m_folderPath("")
+	, m_isMemoryRecord(FALSE)
+	, m_langID(LANG_JAPANESE)
 {
 }
 
@@ -61,7 +68,6 @@ void CLiveTab::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_DECODE_POS_W, m_xvDecodeSize.cx);
 	DDX_Text(pDX, IDC_DECODE_POS_H, m_xvDecodeSize.cy);
 	DDX_Radio(pDX, IDC_DECODE_CPU, m_decodeMode);
-	//DDX_Radio(pDX, IDC_DECODE_GPU, m_decodeMode);
 }
 
 BOOL CLiveTab::OpenCamera(UINT32 nDeviceNo, UINT32 nSingleXferTimeOut, UINT32 nContinuousXferTimeOut, UINT32 nRingBufCount)
@@ -107,14 +113,25 @@ BOOL CLiveTab::OpenCamera(UINT32 nDeviceNo, UINT32 nSingleXferTimeOut, UINT32 nC
 			OnBnClickedDecodeGPU();
 		}
 	}
+	else
+	{
+		m_enableDecodeGPU = FALSE;
+		OnBnClickedDecodeCPU();
+	}
 
 	m_camera.SetCallbackSingle(_SingleProc, this);
 	m_camera.SetCallbackContinuous(_ContinuousProc, this);
+
 	return TRUE;
 }
 
 void CLiveTab::CloseCamera()
 {
+	CDefaultParams& df = ((CCamMonitorApp*)AfxGetApp())->GetDefaultParams();
+	df.cameraFramerateIndex = m_comboFramerate.GetCurSel();
+	df.cameraResolutionIndex = m_comboReso.GetCurSel();
+	df.cameraShutterSpeedIndex = m_comboShutterFps.GetCurSel();
+
 	StopRec();
 	StopLive();
 
@@ -162,14 +179,16 @@ void CLiveTab::StartRec()
 	*pRec = TRUE;
 	m_nRecFrameCount = 0;
 
+	CTime time = CTime::GetCurrentTime();
+	m_saveTimeStamp = time.Format(_T("%Y%m%d%H%M%S"));
+
 	CDefaultParams& df = ((CCamMonitorApp*)AfxGetApp())->GetDefaultParams();
 	if (df.cameraSaveFileType == SAVE_FILE_TYPE_RAW)
 	{
-		CString filepath;
-		filepath.Format(_T("%s\\%s.mdat"), (LPCTSTR)df.cameraSaveFolderPath, (LPCTSTR)df.cameraSaveFileName);
+		m_filepath.Format(_T("%s\\%s_%s.mdat"), (LPCTSTR)df.cameraSaveFolderPath, (LPCTSTR)df.cameraSaveFileName, (LPCTSTR)m_saveTimeStamp);
 
 		FILE* fp = NULL;
-		errno_t error = _tfopen_s(&fp, filepath, _T("wb"));
+		errno_t error = _tfopen_s(&fp, m_filepath, _T("wb"));
 		if (!fp || error != 0)
 		{
 			TRACE(_T("fopen error\n"));
@@ -178,14 +197,23 @@ void CLiveTab::StartRec()
 		{
 			m_mdatFile = fp;
 		}
+
+		if (m_isMemoryRecord)
+		{
+			m_ringBuffer->Clear();
+			CProgressCtrl* pProgress = (CProgressCtrl*)GetDlgItem(IDC_PROGRESS_RINGBUFFER);
+			pProgress->SetPos(0);
+			SetTimer(TIMER_ID_UPDATE_RINGBUFFER, UPDATE_RINGBUFFER_INTERVAL, NULL);
+			GetDlgItem(IDC_PROGRESS_RINGBUFFER)->ShowWindow(SW_SHOW);
+		}
 	}
+
 	if (df.cameraSaveFileType == SAVE_FILE_TYPE_CSV)
 	{
-		CString filepath;
-		filepath.Format(_T("%s\\%s.csv"), (LPCTSTR)df.cameraSaveFolderPath, (LPCTSTR)df.cameraSaveFileName);
+		m_filepath.Format(_T("%s\\%s_%s.csv"), (LPCTSTR)df.cameraSaveFolderPath, (LPCTSTR)df.cameraSaveFileName, (LPCTSTR)m_saveTimeStamp);
 
 		FILE* fp = NULL;
-		errno_t error = _tfopen_s(&fp, filepath, _T("w"));
+		errno_t error = _tfopen_s(&fp, m_filepath, _T("w"));
 		if (!fp || error != 0)
 		{
 			TRACE(_T("fopen error\n"));
@@ -199,7 +227,6 @@ void CLiveTab::StartRec()
 
 	m_lockRec.Unlock();
 	// ***Unlock***
-
 }
 
 void CLiveTab::StopRec()
@@ -208,8 +235,41 @@ void CLiveTab::StopRec()
 	BOOL* pRec = (BOOL*)m_lockRec.GetLockData();
 	if (*pRec)
 	{
+		if (m_isMemoryRecord)
+		{
+			KillTimer(TIMER_ID_UPDATE_RINGBUFFER);
+
+			FILE* fp = m_mdatFile;
+			int saveFrameCount = 0;
+			if (fp)
+			{
+				auto imageCount = m_ringBuffer->GetImageCount();
+				CProgressDialog progressDialog(0, imageCount, this);
+				progressDialog.Create(IDD_PROGRESS, this);
+				progressDialog.ShowWindow(SW_SHOW);
+				progressDialog.UpdateWindow();
+
+				for (int i = 0; i < imageCount; i++)
+				{
+					BOOL isStorageAvailable = CheckDiskSpace(m_folderPath, 1024);
+					if (!isStorageAvailable)
+						break;
+
+					fwrite(m_ringBuffer->GetImage(), m_ringBuffer->GetImageSize(), 1, fp);
+					saveFrameCount++;
+					progressDialog.SetPos(i);
+					progressDialog.SetText(i, imageCount);
+				}
+				progressDialog.DestroyWindow();
+			}
+			
+			m_nRecFrameCount = saveFrameCount;
+			GetDlgItem(IDC_PROGRESS_RINGBUFFER)->ShowWindow(SW_HIDE);
+		}
+
 		*pRec = FALSE;
 		m_lockRec.Unlock();
+		BOOL isMdat = FALSE;
 
 		CDefaultParams& df = ((CCamMonitorApp*)AfxGetApp())->GetDefaultParams();
 		if (df.cameraSaveFileType == SAVE_FILE_TYPE_RAW)
@@ -223,9 +283,11 @@ void CLiveTab::StopRec()
 		}
 
 		if (m_mdatFile) {
+			isMdat = TRUE;
 			fclose(m_mdatFile);
 			m_mdatFile = nullptr;
 		}
+		
 	}
 	else
 	{
@@ -250,9 +312,11 @@ void CLiveTab::WriteCIH()
 
 	CString filepath;
 	static INT64 n = 0;
-	filepath.Format(_T("%s\\%s.cih"), (LPCTSTR)df.cameraSaveFolderPath, (LPCTSTR)df.cameraSaveFileName);
+	filepath.Format(_T("%s\\%s_%s.cih"), (LPCTSTR)df.cameraSaveFolderPath, (LPCTSTR)df.cameraSaveFileName, (LPCTSTR)m_saveTimeStamp);
 
 	cih.Write(filepath);
+	df.latestSaveCIHFullPath = filepath;
+	df.Write();
 }
 
 void CLiveTab::DecodeImage(PUCHAR pBuffer)
@@ -267,7 +331,7 @@ void CLiveTab::DecodeImage(PUCHAR pBuffer)
 		UINT32 w, h;
 		PUC_GetResolution(m_camera.GetHandle(), &w, &h);
 
-		auto result = PUC_DecodeGPU(
+		PUC_DecodeGPU(
 			true,
 			pBuffer,
 			&tmpDst,
@@ -322,7 +386,7 @@ void CLiveTab::ContinuousProc(PPUC_XFER_DATA_INFO pInfo)
 	// Save
 	BOOL* pRec = (BOOL*)m_lockRec.GetLockData();
 	
-	// 同一フレームは保存しない
+	// Do not save the same frame
 	if (pInfo->nSequenceNo == nPreSeqNo)
 	{
 		m_lockRec.Unlock();
@@ -337,12 +401,18 @@ void CLiveTab::ContinuousProc(PPUC_XFER_DATA_INFO pInfo)
 
 		if (df.cameraSaveFileType == SAVE_FILE_TYPE_RAW)
 		{
-			fp = m_mdatFile;
-
-			if (fp)
+			if (m_isMemoryRecord)
 			{
-				fwrite(pInfo->pData, pInfo->nDataSize, 1, fp);
-				m_nRecFrameCount++;
+				m_ringBuffer->AddImage(pInfo->pData);
+			}
+			else
+			{
+				fp = m_mdatFile;
+				if (fp)
+				{
+					fwrite(pInfo->pData, pInfo->nDataSize, 1, fp);
+					m_nRecFrameCount++;
+				}
 			}
 		}
 		else if (df.cameraSaveFileType == SAVE_FILE_TYPE_CSV)
@@ -361,7 +431,11 @@ void CLiveTab::ContinuousProc(PPUC_XFER_DATA_INFO pInfo)
 		}
 
 		nPreSeqNo = pInfo->nSequenceNo;
-	}
+
+		BOOL isStorageAvailable = CheckDiskSpace(m_folderPath, 1024);
+		if (!isStorageAvailable)
+			OnBnClickedStop();
+	}	
 
 	m_lockRec.Unlock();
 }
@@ -402,8 +476,8 @@ void CLiveTab::UpdateControlState()
 	m_lockRec.Unlock();
 	// ***Unlock***
 
-	GetDlgItem(IDC_OPENCAMERA)->EnableWindow(!bRecording);
-	GetDlgItem(IDC_RESETCAMERA)->EnableWindow(bOpened && !bRecording);
+	GetDlgItem(IDC_OPENCAMERA)->EnableWindow(!bRecording && !bContinuous);
+	GetDlgItem(IDC_RESETCAMERA)->EnableWindow(bOpened && !bRecording && !bContinuous);
 	m_buttonRec.EnableWindow(bOpened && bContinuous && !bRecording);
 	GetDlgItem(IDC_STOP)->EnableWindow(bRecording);
 	GetDlgItem(IDC_ACQUISITION_SINGLE)->EnableWindow(bOpened && !bRecording);
@@ -434,7 +508,9 @@ void CLiveTab::UpdateControlState()
 	GetDlgItem(IDC_RESET_SEQNO)->EnableWindow(bOpened && !bContinuous);
 	GetDlgItem(IDC_DECODE_CPU)->EnableWindow(bOpened && !bContinuous);
 	GetDlgItem(IDC_DECODE_GPU)->EnableWindow(bOpened && !bContinuous && m_enableDecodeGPU);
-
+	GetDlgItem(IDC_RECORD_MODE_MEMORY)->EnableWindow(bOpened && !bContinuous);
+	GetDlgItem(IDC_RECORD_MODE_STORAGE)->EnableWindow(bOpened && !bContinuous);
+	GetDlgItem(IDC_SPIN_RECORDTIME)->EnableWindow(bOpened && !bContinuous);
 
 	// Record button color
 	if (bRecording)
@@ -452,7 +528,75 @@ void CLiveTab::UpdateControlState()
 		m_buttonRec.SetWindowText(s);
 	}
 
+	CButton* pAcqSingle = (CButton*)GetDlgItem(IDC_ACQUISITION_SINGLE);
+	auto isSingle = pAcqSingle->GetCheck() == BST_CHECKED;
+	GetDlgItem(IDC_REC)->ShowWindow(isSingle ? SW_HIDE : SW_SHOW);
+	GetDlgItem(IDC_STOP)->ShowWindow(isSingle ? SW_HIDE : SW_SHOW);
+	GetDlgItem(IDC_SAVE_TO)->ShowWindow(isSingle ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_RESET_SEQNO)->ShowWindow(isSingle ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_SNAPSHOT)->ShowWindow(isSingle ? SW_SHOW : SW_HIDE);
+
+	GetDlgItem(IDC_TEXT_RECORD_TIME)->SetWindowTextW(ConvertToTimeFormat(CalcRecordTimeSecond()));
+
 	Invalidate();
+}
+
+void CLiveTab::UpdateControlText()
+{
+	SetThreadUILanguage(m_langID);
+
+	CString text;
+	text.LoadString(IDS_TEXT_ACQUISITION_MODE);
+	GetDlgItem(IDC_LABEL_ACQUISITION_MODE)->SetWindowText(text);
+	text.LoadString(IDS_TEXT_SINGLE);
+	GetDlgItem(IDC_ACQUISITION_SINGLE)->SetWindowText(text);
+	text.LoadString(IDS_TEXT_CONTINUOUS);
+	GetDlgItem(IDC_ACQUISITION_CONTINUOUS)->SetWindowText(text);
+
+	text.LoadString(IDS_TEXT_RECORD_MODE);
+	GetDlgItem(IDC_LABEL_RECORD_MODE)->SetWindowText(text);
+	text.LoadString(IDS_TEXT_MEMORY);
+	GetDlgItem(IDC_RECORD_MODE_MEMORY)->SetWindowText(text);
+	text.LoadString(IDS_TEXT_STORAGE);
+	GetDlgItem(IDC_RECORD_MODE_STORAGE)->SetWindowText(text);
+
+	text.LoadString(IDS_TEXT_RECORD_TIME);
+	GetDlgItem(IDC_LABEL_RECORD_TIME)->SetWindowText(text);
+
+	text.LoadString(IDS_TEXT_SETUP);
+	GetDlgItem(GROUP_SETTING)->SetWindowText(text);
+
+	text.LoadString(IDS_TEXT_FRAMERATE);
+	GetDlgItem(IDC_LABEL_FRAMERATE)->SetWindowText(text);
+	text.LoadString(IDS_TEXT_SHUTTER_SPEED);
+	GetDlgItem(IDC_LABEL_SHUTTER_SPEED)->SetWindowText(text);
+	text.LoadString(IDS_TEXT_RESOLUTION);
+	GetDlgItem(IDC_LABEL_RESOLUTION)->SetWindowText(text);
+
+	text.LoadString(IDS_TEXT_ADVANCED_SETTING);
+	GetDlgItem(IDC_CHECK_ADVANCED_SETTING)->SetWindowText(text);
+
+	text.LoadString(IDS_TEXT_EXPOSE);
+	GetDlgItem(IDC_LABEL_EXPOSE)->SetWindowText(text);
+
+	text.LoadString(IDS_TEXT_DELAY);
+	GetDlgItem(IDC_LABEL_DELAY)->SetWindowText(text);
+	text.LoadString(IDS_TEXT_WIDTH);
+	GetDlgItem(IDC_LABEL_WIDTH)->SetWindowText(text);
+	text.LoadString(IDS_TEXT_MAGNIFICATION);
+	GetDlgItem(IDC_LABEL_MAGNIFICATION)->SetWindowText(text);
+	
+	text.LoadString(IDS_TEXT_SAVE_TO);
+	GetDlgItem(IDC_SAVE_TO)->SetWindowText(text);
+	text.LoadString(IDS_TEXT_RESET_SEQNO);
+	GetDlgItem(IDC_RESET_SEQNO)->SetWindowText(text);
+	text.LoadString(IDS_TEXT_SNAPSHOT);
+	GetDlgItem(IDC_SNAPSHOT)->SetWindowText(text);
+
+	text.LoadString(IDS_TEXT_RECORD);
+	GetDlgItem(IDC_REC)->SetWindowText(text);
+	text.LoadString(IDS_TEXT_STOP);
+	GetDlgItem(IDC_STOP)->SetWindowText(text);
 }
 
 void CLiveTab::UpdateCameraSerialNo()
@@ -520,7 +664,7 @@ void CLiveTab::UpdateShutterFpsComboBox()
 
 		for (int j = 0; j < FramerateShutterTable[i].itemList.nSize; j++)
 		{
-			s.Format(_T("1/%u fps"), FramerateShutterTable[i].itemList.items[j]);
+			s.Format(_T("1/%u"), FramerateShutterTable[i].itemList.items[j]);
 			m_comboShutterFps.AddString(s);
 			m_comboShutterFps.SetItemData(m_comboShutterFps.GetCount() - 1, FramerateShutterTable[i].itemList.items[j]);
 
@@ -811,7 +955,19 @@ BEGIN_MESSAGE_MAP(CLiveTab, CBaseTab)
 	ON_BN_CLICKED(IDC_DECODE_CPU, &CLiveTab::OnBnClickedDecodeCPU)
 	ON_BN_CLICKED(IDC_DECODE_GPU, &CLiveTab::OnBnClickedDecodeGPU)
 
+	ON_BN_CLICKED(IDC_CHECK_ADVANCED_SETTING, &CLiveTab::OnBnClickedCheckAdvancedSetting)
+	ON_BN_CLICKED(IDC_REOCRD_MODE_STORAGE, &CLiveTab::OnBnClickedRecordModeStorage)
+	ON_BN_CLICKED(IDC_RECORD_MODE_MEMORY, &CLiveTab::OnBnClickedRecordModeMemory)
+	ON_BN_CLICKED(IDC_RECORD_MODE_STORAGE, &CLiveTab::OnBnClickedRecordModeStorage)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_RECORDTIME, &CLiveTab::OnDeltaposSpinRecordtime)
 END_MESSAGE_MAP()
+
+std::string WideStringToString(const std::wstring& wideString) {
+	int bufferSize = WideCharToMultiByte(CP_UTF8, 0, wideString.c_str(), -1, nullptr, 0, nullptr, nullptr);
+	std::string result(bufferSize - 1, 0);
+	WideCharToMultiByte(CP_UTF8, 0, wideString.c_str(), -1, &result[0], bufferSize - 1, nullptr, nullptr);
+	return result;
+}
 
 LRESULT CLiveTab::OnInitDialog(WPARAM wParam, LPARAM lParam)
 {
@@ -819,10 +975,109 @@ LRESULT CLiveTab::OnInitDialog(WPARAM wParam, LPARAM lParam)
 	if (!ret)
 		return ret;
 
-	UpdateControlState();
+	auto deviceInfo = SetupDiGetClassDevsA(nullptr, "USB", nullptr, DIGCF_PRESENT | DIGCF_ALLCLASSES);
+	BOOL isOpened = FALSE;
+	if (deviceInfo != INVALID_HANDLE_VALUE)
+	{
+		int deviceCount = 0;
+		SP_DEVINFO_DATA deviceInfoData;
+		deviceInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
 
-	OnBnClickedAcquisitionSingle();
-	OnBnClickedDecodeCPU();
+		for (DWORD i = 0; SetupDiEnumDeviceInfo(deviceInfo, i, &deviceInfoData); ++i)
+		{
+			WCHAR buf[256];
+			DWORD requiredSize = 0;
+
+			if (SetupDiGetDeviceRegistryProperty(deviceInfo, &deviceInfoData, SPDRP_MFG, nullptr, reinterpret_cast<PBYTE>(buf), sizeof(buf), &requiredSize))
+			{
+				auto manufacturer = WideStringToString(std::wstring(buf));
+
+				if (manufacturer == "Photron" || manufacturer == "PHOTRON" || manufacturer == "PHOTRON LIMITED")
+					deviceCount++;
+			}
+		}
+
+		SetupDiDestroyDeviceInfoList(deviceInfo);
+
+		if (deviceCount == 1)
+		{
+			isOpened = OpenCamera(0, 0, 0, 1024);
+		}
+	}
+	
+	UpdateBuffer();
+	UpdateLiveUI();
+	StartLive();
+
+	UpdateControlState();
+	UpdateControlText();
+
+	if (isOpened)
+	{
+		StopLive();
+
+		CString msg;
+		CDefaultParams& df = ((CCamMonitorApp*)AfxGetApp())->GetDefaultParams();
+
+		m_comboFramerate.SetCurSel(df.cameraFramerateIndex);
+		UINT32 nFramerate = m_comboFramerate.GetItemData(m_comboFramerate.GetCurSel());
+		auto result = PUC_SetFramerateShutter(m_camera.GetHandle(), nFramerate, nFramerate);
+		if (PUC_CHK_FAILED(result))
+		{
+			msg.FormatMessage(IDS_ERROR_CODE, _T("PUC_SetFramerateShutter"), result);
+			AfxMessageBox(msg, MB_OK | MB_ICONERROR);
+		}
+
+		UpdateFramerateComboBox();
+		UpdateShutterFpsComboBox();
+		UpdateResoComboBox();
+
+		m_comboShutterFps.SetCurSel(df.cameraShutterSpeedIndex);
+		UINT32 nShutterFps = m_comboShutterFps.GetItemData(m_comboShutterFps.GetCurSel());
+		result = PUC_SetFramerateShutter(m_camera.GetHandle(), nFramerate, nShutterFps);
+		if (PUC_CHK_FAILED(result))
+		{
+			msg.FormatMessage(IDS_ERROR_CODE, _T("PUC_SetFramerateShutter"), result);
+			AfxMessageBox(msg, MB_OK | MB_ICONERROR);
+		}
+
+		UpdateFramerateComboBox();
+		UpdateShutterFpsComboBox();
+		UpdateResoComboBox();
+
+		m_comboReso.SetCurSel(df.cameraResolutionIndex);
+		UINT32 nResolution = m_comboReso.GetItemData(m_comboReso.GetCurSel());
+		result = PUC_SetResolution(m_camera.GetHandle(), RESO_W(nResolution), RESO_H(nResolution));
+		if (PUC_CHK_FAILED(result))
+		{
+			msg.FormatMessage(IDS_ERROR_CODE, _T("PUC_SetResolution"), result);
+			AfxMessageBox(msg, MB_OK | MB_ICONERROR);
+		}
+
+		UpdateFramerateComboBox();
+		UpdateShutterFpsComboBox();
+		UpdateResoComboBox();
+		UpdateExposeTime();
+		UpdateSyncOutWidthEdit();
+		UpdateSyncOutMagComboBox();
+
+		UpdateBuffer();
+		ResetDecodePos();
+
+		StartLive();
+		UpdateControlState();
+
+		OnBnClickedAcquisitionContinuous();
+	}
+	else
+		OnBnClickedAcquisitionSingle();
+
+	OnBnClickedCheckAdvancedSetting();
+	OnBnClickedRecordModeStorage();
+
+	CButton* pRecordStorage = (CButton*)GetDlgItem(IDC_RECORD_MODE_STORAGE);
+	pRecordStorage->SetCheck(BST_CHECKED);
+	GetDlgItem(IDC_PROGRESS_RINGBUFFER)->ShowWindow(SW_HIDE);
 
 	return FALSE;
 }
@@ -856,6 +1111,15 @@ void CLiveTab::OnTimer(UINT_PTR nIDEvent)
 			PTEXTINFO pTextInfo = (PTEXTINFO)m_lockTextInfo.GetLockData();
 			PUC_GetSensorTemperature(m_camera.GetHandle(), &pTextInfo->nTemp);
 			m_lockTextInfo.Unlock();
+		}
+	}
+	else if (nIDEvent == TIMER_ID_UPDATE_RINGBUFFER)
+	{
+		if (m_isMemoryRecord && m_ringBuffer)
+		{
+			double fillPercentage = m_ringBuffer->GetFillPercentage();
+			CProgressCtrl* pProgress = (CProgressCtrl*)GetDlgItem(IDC_PROGRESS_RINGBUFFER);
+			pProgress->SetPos(static_cast<int>(fillPercentage));
 		}
 	}
 	CBaseTab::OnTimer(nIDEvent);
@@ -905,6 +1169,12 @@ EXIT_LABEL:
 
 void CLiveTab::OnBnClickedRec()
 {
+	if (m_folderPath.IsEmpty())
+	{
+		AfxMessageBox(_T("Please set save file path."), MB_OK | MB_ICONERROR);
+		return;
+	}
+
 	StartRec();
 	UpdateControlState();
 }
@@ -924,6 +1194,11 @@ void CLiveTab::OnBnClickedAcquisitionSingle()
 	
 	m_camera.SetAcquisitionMode((ACQUISITION_MODE)m_xvAcqMode);
 
+	if (m_ringBuffer != nullptr)
+	{
+		m_ringBuffer.reset();
+	}
+
 	StartLive();
 	UpdateControlState();
 }
@@ -932,10 +1207,27 @@ void CLiveTab::OnBnClickedAcquisitionContinuous()
 {
 	StopLive();
 
-	m_xvAcqMode = ACQUISITION_MODE_CONTINUOUS;
-	UpdateData(FALSE);
+	if (!m_folderPath.IsEmpty())
+	{
+		m_xvAcqMode = ACQUISITION_MODE_CONTINUOUS;
+		UpdateData(FALSE);
 
-	m_camera.SetAcquisitionMode((ACQUISITION_MODE)m_xvAcqMode);
+		m_camera.SetAcquisitionMode((ACQUISITION_MODE)m_xvAcqMode);
+
+		if (m_isMemoryRecord)
+		{
+			if(m_ringBuffer != nullptr)
+				m_ringBuffer.reset();
+			m_ringBuffer = CreateRingBuffer(m_camera.getImageDataSize());
+		}
+	}
+	else
+	{
+		CButton* pAcqSingle = (CButton*)GetDlgItem(IDC_ACQUISITION_SINGLE);
+		pAcqSingle->SetCheck(BST_CHECKED);
+		CButton* pAcqContinuous = (CButton*)GetDlgItem(IDC_ACQUISITION_CONTINUOUS);
+		pAcqContinuous->SetCheck(!BST_CHECKED);
+	}
 
 	StartLive();
 	UpdateControlState();
@@ -1345,11 +1637,78 @@ void CLiveTab::OnBnClickedSnapshot()
 	AfxMessageBox(IDS_COMPLETED, MB_OK | MB_ICONINFORMATION);
 }
 
+CString CLiveTab::ConvertToTimeFormat(ULONGLONG totalseconds) {
+	ULONGLONG hours = totalseconds / 3600;
+	ULONGLONG minutes = (totalseconds % 3600) / 60;
+	ULONGLONG seconds = totalseconds % 60;
+
+	CString formattedTime;
+	formattedTime.Format(_T("%02llu:%02llu:%02llu"), hours, minutes, seconds);
+	return formattedTime;
+}
+
+ULONGLONG CLiveTab::CalcRecordTimeSecond()
+{
+	CDefaultParams& df = ((CCamMonitorApp*)AfxGetApp())->GetDefaultParams();
+	m_folderPath = (LPCTSTR)df.cameraSaveFolderPath;
+
+	if (m_folderPath.IsEmpty() || !m_camera.IsOpened())
+		return 0;
+
+	CButton* pRecordMemory = (CButton*)GetDlgItem(IDC_RECORD_MODE_MEMORY);
+	BOOL isMemory = pRecordMemory->GetCheck() == BST_CHECKED;
+	ULONGLONG recordTime_seconds = 0;
+	auto dataSize = m_camera.getImageDataSize();
+
+	if (isMemory)
+	{
+		double size = 0;
+		if (m_ringBuffer == nullptr)
+		{
+			// If ringbuffer is not allocated yet
+			// Calculate using 80% of RAM as a guide
+			size = GetAvailableRAMSpace() * 0.8 / dataSize;
+		}
+		else
+		{
+			size = m_ringBuffer->GetBufferSize();
+		}
+
+		recordTime_seconds = size / m_camera.getFramerate();
+	}
+	else
+	{
+		ULARGE_INTEGER freeBytesAvailabletoCaller;
+		if (GetDiskFreeSpaceEx(m_folderPath, &freeBytesAvailabletoCaller, NULL, NULL))
+		{
+			auto usageSpace = freeBytesAvailabletoCaller.QuadPart * 0.8 - 1024 * 1024 * 1024;
+			if (usageSpace < 0)
+				usageSpace = 0;
+
+			recordTime_seconds = usageSpace / (dataSize * m_camera.getFramerate());
+		}
+	}
+
+	if (recordTime_seconds < 1)
+	{
+		recordTime_seconds = 0;
+	}
+
+	CSpinButtonCtrl* pSpin = (CSpinButtonCtrl*)GetDlgItem(IDC_SPIN_RECORDTIME);
+	auto currentPos = pSpin->GetPos32();
+	pSpin->SetRange32(0, recordTime_seconds);
+	pSpin->SetPos32(recordTime_seconds);
+
+	return recordTime_seconds;
+}
+
 void CLiveTab::OnBnClickedSaveTo()
 {
 	CSaveLiveDialog dlg(this);
 	if (dlg.DoModal() != IDOK)
 		return;
+
+	GetDlgItem(IDC_TEXT_RECORD_TIME)->SetWindowTextW(ConvertToTimeFormat(CalcRecordTimeSecond()));
 }
 
 void CLiveTab::OnBnClickedResetSeqNo()
@@ -1384,4 +1743,124 @@ void CLiveTab::OnBnClickedDecodeGPU()
 
 	StartLive();
 	UpdateControlState();
+}
+
+void CLiveTab::OnBnClickedCheckAdvancedSetting()
+{
+	CButton* pAdvancedSetting = (CButton*)GetDlgItem(IDC_CHECK_ADVANCED_SETTING);
+	auto isChecked = pAdvancedSetting->GetCheck() == BST_CHECKED;
+
+	GetDlgItem(IDC_EXPOSE_ON)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_EXPOSE_OFF)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_SYNC_IN_INTERNAL)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_SYNC_IN_EXTERNAL)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_SYNC_IN_SIGNAL_POSI)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_SYNC_IN_SIGNAL_NEGA)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_SYNC_OUT_SIGNAL_POSI)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_SYNC_OUT_SIGNAL_NEGA)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_SYNC_OUT_DELAY)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_SYNC_OUT_WIDTH)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_SYNC_OUT_MAGNIFICATION)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_QUANTIZATION)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_DECODE_POS_X)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_DECODE_POS_Y)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_DECODE_POS_W)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_DECODE_POS_H)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_DECODE_CPU)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_DECODE_GPU)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+
+	GetDlgItem(IDC_STATIC5)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_STATIC6)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_STATIC7)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_STATIC8)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_STATIC9)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_STATIC11)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_STATIC12)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_STATIC13)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_STATIC14)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_STATIC15)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_STATIC16)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_STATIC17)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_STATIC18)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_STATIC19)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_STATIC20)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_STATIC21)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_STATIC22)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_STATIC23)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_STATIC24)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_STATIC25)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_STATIC27)->ShowWindow(isChecked ? SW_SHOW : SW_HIDE);
+}
+
+std::unique_ptr<RingBuffer> CLiveTab::CreateRingBuffer(UINT32 imageSize)
+{
+	CSpinButtonCtrl* pSpin = (CSpinButtonCtrl*)GetDlgItem(IDC_SPIN_RECORDTIME);
+	int nPos = pSpin->GetPos32();
+	auto bufferSize = nPos * m_camera.getFramerate();
+
+	while (bufferSize > 0)
+	{
+		try
+		{
+			return std::make_unique<RingBuffer>(bufferSize, imageSize);
+		}
+		catch(const std::bad_alloc&)
+		{
+			bufferSize = bufferSize * 90 / 100;
+		}
+	}
+
+	throw std::runtime_error("Failed to allocate buffer");
+}
+
+double CLiveTab::GetAvailableRAMSpace()
+{
+	MEMORYSTATUSEX meminfo;
+	meminfo.dwLength = sizeof(MEMORYSTATUSEX);
+	GlobalMemoryStatusEx(&meminfo);
+	return meminfo.ullAvailPhys;
+}
+
+void CLiveTab::OnBnClickedRecordModeMemory()
+{
+	m_isMemoryRecord = TRUE;
+
+	m_ringBuffer.reset();
+	GetDlgItem(IDC_TEXT_RECORD_TIME)->SetWindowTextW(ConvertToTimeFormat(CalcRecordTimeSecond()));
+	GetDlgItem(IDC_SPIN_RECORDTIME)->ShowWindow(SW_SHOW);
+	GetDlgItem(IDC_SPIN_RECORDTIME)->EnableWindow(TRUE);
+}
+
+void CLiveTab::OnBnClickedRecordModeStorage()
+{
+	m_isMemoryRecord = FALSE;
+
+	m_ringBuffer.reset();
+	GetDlgItem(IDC_TEXT_RECORD_TIME)->SetWindowTextW(ConvertToTimeFormat(CalcRecordTimeSecond()));
+	GetDlgItem(IDC_SPIN_RECORDTIME)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDC_SPIN_RECORDTIME)->EnableWindow(FALSE);
+}
+
+void CLiveTab::OnDeltaposSpinRecordtime(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
+	
+	CSpinButtonCtrl* pSpin = (CSpinButtonCtrl*)GetDlgItem(IDC_SPIN_RECORDTIME);
+	int min, max;
+	pSpin->GetRange32(min, max);
+	int nPos = pSpin->GetPos32();
+	int newPos = nPos + pNMUpDown->iDelta;
+
+	if (newPos < min)
+	{
+		newPos = min;
+	}
+	else if (newPos > max)
+	{
+		newPos = max;
+	}
+
+	GetDlgItem(IDC_TEXT_RECORD_TIME)->SetWindowTextW(ConvertToTimeFormat(newPos));
+
+	*pResult = 0;
 }

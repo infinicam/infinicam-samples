@@ -66,108 +66,101 @@ END
 // Dialog
 //
 
-IDD_LIVE DIALOGEX 0, 0, 218, 426
+IDD_LIVE DIALOGEX 0, 0, 236, 492
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    PUSHBUTTON      "Open Camera", IDC_OPENCAMERA,15,7,65,17
-    LTEXT           "",IDC_STATIC_SERIAL,18,30,126,18
+    PUSHBUTTON      "Open Camera",IDC_OPENCAMERA,15,7,65,17
+    LTEXT           "",IDC_STATIC_SERIAL,18,31,126,18
     CONTROL         "FAN",IDC_FAN_CTRL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,173,13,29,10
     CONTROL         "LED",IDC_LED_MODE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,173,28,28,10
-    GROUPBOX        "Setup",IDC_STATIC,7,54,204,318
-
-    LTEXT           "Framerate",IDC_STATIC,24,66,60,8
-    COMBOBOX        IDC_FRAMERATE,90,63,108,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-
-    LTEXT           "Shutter Speed",IDC_STATIC,24,86,60,8
-    COMBOBOX        IDC_SHUTTERFPS,90,83,108,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-
-    LTEXT           "Expose",IDC_STATIC,24,107,60,8
-    LTEXT           "On:",IDC_STATIC,90,107,15,8
-    EDITTEXT        IDC_EXPOSE_ON,114,105,48,14,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "(nsec)",IDC_STATIC,170,108,24,8
-    LTEXT           "Off:",IDC_STATIC,89,126,15,8
-    EDITTEXT        IDC_EXPOSE_OFF,114,123,48,14,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "(nsec)",IDC_STATIC,170,126,24,8
-
-    LTEXT           "Resolution",IDC_STATIC,24,148,60,8
-    COMBOBOX        IDC_RESOLUTION,90,145,108,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-
-    LTEXT           "Sync In",IDC_STATIC,24,164,60,8
-    CONTROL         "Internal",IDC_SYNC_IN_INTERNAL,"Button",BS_AUTORADIOBUTTON | WS_GROUP,91,164,41,10
-    CONTROL         "External",IDC_SYNC_IN_EXTERNAL,"Button",BS_AUTORADIOBUTTON,149,164,42,10
-    LTEXT           "Signal:",IDC_STATIC,90,178,30,8
-    CONTROL         "POSI",IDC_SYNC_IN_SIGNAL_POSI,"Button",BS_AUTORADIOBUTTON | WS_GROUP,128,178,32,10
-    CONTROL         "NEGA",IDC_SYNC_IN_SIGNAL_NEGA,"Button",BS_AUTORADIOBUTTON,169,178,34,10
-
-    LTEXT           "Sync Out",IDC_STATIC,24,195,60,8
-    LTEXT           "Signal:",IDC_STATIC,90,195,30,8
-    CONTROL         "POSI",IDC_SYNC_OUT_SIGNAL_POSI,"Button",BS_AUTORADIOBUTTON | WS_GROUP,128,195,32,10
-    CONTROL         "NEGA",IDC_SYNC_OUT_SIGNAL_NEGA,"Button",BS_AUTORADIOBUTTON,169,195,34,10
-
-    LTEXT           "Delay:",IDC_STATIC,90,210,30,8
-    EDITTEXT        IDC_SYNC_OUT_DELAY,129,209,45,14,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "(nsec)",IDC_STATIC,179,210,24,8
-
-    LTEXT           "Width:",IDC_STATIC,90,230,30,8
-    EDITTEXT        IDC_SYNC_OUT_WIDTH,129,228,45,14,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "(nsec)",IDC_STATIC,180,230,24,8
-
-    LTEXT           "Magnification:",IDC_STATIC,90,249,48,8
-    COMBOBOX        IDC_SYNC_OUT_MAGNIFICATION,144,249,48,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-
-    LTEXT           "Quantization",IDC_STATIC,24,268,66,8
-    COMBOBOX        IDC_QUANTIZATION,90,266,108,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-
-    LTEXT           "Decode Position",IDC_STATIC,24,290,66,8
-    LTEXT           "X:",IDC_STATIC,92,290,14,8
-    EDITTEXT        IDC_DECODE_POS_X,106,289,32,14,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "Y:",IDC_STATIC,151,290,14,8
-    EDITTEXT        IDC_DECODE_POS_Y,165,289,32,14,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "W:",IDC_STATIC,92,308,14,8
-    EDITTEXT        IDC_DECODE_POS_W,106,306,32,14,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "H:",IDC_STATIC,151,308,14,8
-    EDITTEXT        IDC_DECODE_POS_H,165,307,32,14,ES_AUTOHSCROLL | ES_NUMBER
-
-    LTEXT           "Acquisition Mode",IDC_STATIC,25,329,59,8
-    CONTROL         "Single",IDC_ACQUISITION_SINGLE,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,91,329,35,10
-    CONTROL         "Continuous",IDC_ACQUISITION_CONTINUOUS,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,146,329,52,10
-
-    LTEXT           "Decode Mode", IDC_STATIC, 25, 341, 59, 8
-    CONTROL         "CPU", IDC_DECODE_CPU, "Button", BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP, 91, 341, 35, 10
-    CONTROL         "GPU", IDC_DECODE_GPU, "Button", BS_AUTORADIOBUTTON | WS_TABSTOP, 146, 341, 52, 10
-
-    PUSHBUTTON      "Save to",      IDC_SAVE_TO,               29,372,53,14
-    PUSHBUTTON      "Reset SeqNo",  IDC_RESET_SEQNO,           140,372,52,14
-    PUSHBUTTON      "Record",       IDC_REC,                   12,400,54,14
-    PUSHBUTTON      "Stop",         IDC_STOP,                  72,400,54,14
-    PUSHBUTTON      "Snapshot",     IDC_SNAPSHOT,              156,400,48,14
-
-    PUSHBUTTON      "Reset Camera", IDC_RESETCAMERA,           90,7,65,17
+    GROUPBOX        "Setup",GROUP_SETTING,11,109,197,298,WS_GROUP | WS_TABSTOP
+    LTEXT           "Framerate",IDC_LABEL_FRAMERATE,23,123,60,8
+    COMBOBOX        IDC_FRAMERATE,88,122,108,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Shutter Speed",IDC_LABEL_SHUTTER_SPEED,22,142,60,8
+    COMBOBOX        IDC_SHUTTERFPS,88,141,108,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Expose",IDC_LABEL_EXPOSE,24,193,60,8
+    LTEXT           "On:",IDC_STATIC6,92,185,15,8
+    EDITTEXT        IDC_EXPOSE_ON,116,183,48,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "(nsec)",IDC_STATIC7,172,186,24,8
+    LTEXT           "Off:",IDC_STATIC8,91,204,15,8
+    EDITTEXT        IDC_EXPOSE_OFF,116,201,48,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "(nsec)",IDC_STATIC9,172,204,24,8
+    LTEXT           "Resolution",IDC_LABEL_RESOLUTION,22,159,60,8
+    COMBOBOX        IDC_RESOLUTION,88,160,108,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Sync In",IDC_LABEL_SYNC_IN,24,223,60,8
+    CONTROL         "Internal",IDC_SYNC_IN_INTERNAL,"Button",BS_AUTORADIOBUTTON | WS_GROUP,91,223,41,10
+    CONTROL         "External",IDC_SYNC_IN_EXTERNAL,"Button",BS_AUTORADIOBUTTON,149,223,42,10
+    LTEXT           "Signal:",IDC_STATIC12,90,239,30,8
+    CONTROL         "POSI",IDC_SYNC_IN_SIGNAL_POSI,"Button",BS_AUTORADIOBUTTON | WS_GROUP,128,239,32,10
+    CONTROL         "NEGA",IDC_SYNC_IN_SIGNAL_NEGA,"Button",BS_AUTORADIOBUTTON,169,239,34,10
+    LTEXT           "Sync Out",IDC_LABEL_SYNC_OUT,24,256,60,8
+    LTEXT           "Signal:",IDC_STATIC14,90,258,30,8
+    CONTROL         "POSI",IDC_SYNC_OUT_SIGNAL_POSI,"Button",BS_AUTORADIOBUTTON | WS_GROUP,128,258,32,10
+    CONTROL         "NEGA",IDC_SYNC_OUT_SIGNAL_NEGA,"Button",BS_AUTORADIOBUTTON,169,258,34,10
+    LTEXT           "Delay:",IDC_LABEL_DELAY,90,277,37,8
+    EDITTEXT        IDC_SYNC_OUT_DELAY,129,274,45,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "(nsec)",IDC_STATIC16,179,275,24,8
+    LTEXT           "Width:",IDC_LABEL_WIDTH,90,295,36,8
+    LTEXT           "(nsec)",IDC_STATIC18,180,295,24,8
+    LTEXT           "Magnification:",IDC_LABEL_MAGNIFICATION,90,314,48,8
+    COMBOBOX        IDC_SYNC_OUT_MAGNIFICATION,144,314,48,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Quantization",IDC_LABEL_QUANTIZATION,24,333,66,8
+    COMBOBOX        IDC_QUANTIZATION,90,331,108,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Decode Position",IDC_LABEL_DECODE_POSITION,24,355,66,8
+    LTEXT           "X:",IDC_STATIC22,92,355,14,8
+    EDITTEXT        IDC_DECODE_POS_X,106,354,32,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Y:",IDC_STATIC23,151,355,14,8
+    EDITTEXT        IDC_DECODE_POS_Y,165,354,32,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "W:",IDC_STATIC24,92,373,14,8
+    EDITTEXT        IDC_DECODE_POS_W,106,371,32,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "H:",IDC_STATIC25,151,373,14,8
+    EDITTEXT        IDC_DECODE_POS_H,165,372,32,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Acquisition Mode",IDC_LABEL_ACQUISITION_MODE,19,56,59,8
+    CONTROL         "Single",IDC_ACQUISITION_SINGLE,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,85,56,53,10
+    CONTROL         "Continuous",IDC_ACQUISITION_CONTINUOUS,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,141,57,52,10
+    LTEXT           "Decode Mode",IDC_LABEL_DECODE_MODE,25,393,59,8
+    CONTROL         "CPU",IDC_DECODE_CPU,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,91,393,35,10
+    CONTROL         "GPU",IDC_DECODE_GPU,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,146,393,52,10
+    PUSHBUTTON      "Save to",IDC_SAVE_TO,11,413,53,14
+    PUSHBUTTON      "Reset SeqNo",IDC_RESET_SEQNO,85,413,52,14
+    PUSHBUTTON      "Record",IDC_REC,10,433,54,14
+    PUSHBUTTON      "Stop",IDC_STOP,83,433,54,14
+    PUSHBUTTON      "Snapshot",IDC_SNAPSHOT,159,413,48,14
+    PUSHBUTTON      "Reset Camera",IDC_RESETCAMERA,90,7,65,17
+    LTEXT           "Record Mode",IDC_LABEL_RECORD_MODE,19,74,59,8
+    CONTROL         "Memory",IDC_RECORD_MODE_MEMORY,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,85,74,55,10
+    CONTROL         "Storage",IDC_RECORD_MODE_STORAGE,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,141,74,56,10
+    LTEXT           "Record Time",IDC_LABEL_RECORD_TIME,19,91,59,8
+    LTEXT           "00:00:00",IDC_TEXT_RECORD_TIME,85,91,35,8
+    CONTROL         "Advanced Setting",IDC_CHECK_ADVANCED_SETTING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,178,74,10
+    EDITTEXT        IDC_SYNC_OUT_WIDTH,129,294,45,14,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_PROGRESS_RINGBUFFER,"msctls_progress32",WS_BORDER,10,457,80,14
+    CONTROL         "",IDC_SPIN_RECORDTIME,"msctls_updown32",UDS_ARROWKEYS,124,88,12,14
 END
 
-IDD_OPERATION DIALOGEX 0, 0, 238, 459
+IDD_OPERATION DIALOGEX 0, 0, 255, 720
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    CONTROL         "",IDC_TAB_CTRL,"SysTabControl32",0x0,7,7,224,445
+    CONTROL         "",IDC_TAB_CTRL,"SysTabControl32",0x0,7,7,224,499
 END
 
-IDD_FILE DIALOGEX 0, 0, 218, 266
+IDD_FILE DIALOGEX 0, 0, 218, 327
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     PUSHBUTTON      "Open File",IDC_OPEN,6,6,66,18
-    GROUPBOX        "File info",IDC_STATIC,12,31,198,93
-    LTEXT           "File path",IDC_STATIC,18,49,42,8
+    GROUPBOX        "File info",IDC_GROUP_FILE_INFO,12,31,198,93
+    LTEXT           "File path",IDC_LABEL_FILE_PATH,18,49,42,8
     EDITTEXT        IDC_FILEPATH,66,46,132,14,ES_AUTOHSCROLL | ES_READONLY
-    LTEXT           "Frame rate",IDC_STATIC,18,64,42,8
+    LTEXT           "Frame rate",IDC_LABEL_FRAMERATE,18,64,42,8
     EDITTEXT        IDC_FILE_FRAMERATE,66,62,132,14,ES_AUTOHSCROLL | ES_READONLY
-    LTEXT           "Size",IDC_STATIC,18,80,42,8
+    LTEXT           "Size",IDC_LABEL_SIZE,18,80,42,8
     EDITTEXT        IDC_IMAGE_SIZE,66,78,132,14,ES_AUTOHSCROLL | ES_READONLY
-    LTEXT           "Frame count",IDC_STATIC,18,96,42,8
+    LTEXT           "Frame count",IDC_LABEL_FRAME_COUNT,18,96,42,8
     EDITTEXT        IDC_FRAME_COUNT,66,94,132,14,ES_AUTOHSCROLL | ES_READONLY
-    GROUPBOX        "Playback",IDC_STATIC,12,131,198,97
+    GROUPBOX        "Playback",IDC_GROUP_PLAYBACK,12,131,198,97
     EDITTEXT        IDC_START_FRAME,19,152,30,14,ES_CENTER | ES_AUTOHSCROLL | ES_WANTRETURN | ES_NUMBER
     CONTROL         "",IDC_SPIN_START_FRAME,"msctls_updown32",UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,49,152,11,14
     PUSHBUTTON      "<",IDC_POST_START_FRAME,65,152,18,13
@@ -182,8 +175,14 @@ BEGIN
     PUSHBUTTON      "Play",IDC_PLAY,90,201,42,15
     PUSHBUTTON      ">",IDC_FORWARD_FRAME,138,201,30,15
     PUSHBUTTON      ">>",IDC_GO_TO_END,174,201,30,15
-    PUSHBUTTON      "Output Drop Frames",IDC_SAVE_FRAME_INFO,120,237,78,18
-    PUSHBUTTON      "Save Bitmap",IDC_SAVE_TO_FILE,6,237,53,18
+    PUSHBUTTON      "Output Drop Frames",IDC_SAVE_FRAME_INFO,117,298,90,18
+    PUSHBUTTON      "Save",IDC_SAVE_TO_FILE,7,299,53,18
+    COMBOBOX        IDC_COMBO_RESAVE_FORMAT,69,238,48,30,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Resave format",IDC_LABEL_RESAVE_FORMAT,13,240,46,8
+    LTEXT           "Drop frame interpolate",IDC_LABEL_DROP_INTERPOLATE,13,259,89,8
+    CONTROL         "Non",IDC_RADIO_DROP_INTERPOLATE_NON,"Button",BS_AUTORADIOBUTTON | WS_GROUP,14,275,29,10
+    CONTROL         "black image",IDC_RADIO_DROP_INTERPOLATE_DARK,"Button",BS_AUTORADIOBUTTON,51,275,53,10
+    CONTROL         "pre-frame image",IDC_RADIO_DROP_INTERPOLATE_PRE,"Button",BS_AUTORADIOBUTTON,116,275,68,10
 END
 
 IDD_SELECT_CAMERA DIALOGEX 0, 0, 239, 152
@@ -259,17 +258,19 @@ BEGIN
     IDD_LIVE, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 211
+        RIGHTMARGIN, 117
         TOPMARGIN, 7
-        BOTTOMMARGIN, 419
+        BOTTOMMARGIN, 110
+        HORZGUIDE, 1
+        HORZGUIDE, 400
     END
 
     IDD_OPERATION, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 231
+        RIGHTMARGIN, 129
         TOPMARGIN, 7
-        BOTTOMMARGIN, 452
+        BOTTOMMARGIN, 473
     END
 
     IDD_FILE, DIALOG
@@ -277,7 +278,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 211
         TOPMARGIN, 7
-        BOTTOMMARGIN, 259
+        BOTTOMMARGIN, 320
     END
 
     IDD_SELECT_CAMERA, DIALOG
@@ -355,6 +356,182 @@ BEGIN
     0
 END
 
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    IDP_OLE_INIT_FAILED     "OLE initialization failed.  Make sure that the OLE libraries are the correct version."
+    IDS_ERROR_FILEOPEN      "file open Error."
+    IDS_REC                 "録画"
+    IDS_RECORDING           "録画中"
+    IDS_PLAY                "再生"
+    IDS_OPEN_FILTER         "Camera Info Header Files (*.cih)|*.cih||"
+    IDS_PAUSE               "一時停止"
+    IDS_RESTART_MSG         "Writing is complete. \r\nPlease restart the software and the camera."
+    IDS_TEXT_ACQUISITION_MODE "転送モード"
+    IDS_DRAWTEXT_CAMERA     "Sequence no: %1d\nSensor Temperature: %2d\n"
+    IDS_ERROR_CODE          "Error! %1!s! error code: %2!u! ."
+    IDS_SYNC_IN_INTERNAL    "内部"
+END
+
+STRINGTABLE
+BEGIN
+    IDR_MAINFRAME           "CamMonitor"
+    IDS_ERROR_NOT_SUPPORTED "Not Supported."
+    IDS_TEXT_RECORD_TIME    "撮影時間"
+    IDS_TEXT_SETUP          "設定"
+    IDS_TEXT_FRAMERATE      "撮影速度"
+    IDS_TEXT_SHUTTER_SPEED  "シャッター速度"
+    IDS_TEXT_RESOLUTION     "解像度"
+    IDS_TEXT_ADVANCED_SETTING "詳細設定"
+    IDS_TEXT_EXPOSE         "露光時間"
+    IDS_TEXT_SYNC_IN        "Sync In"
+    IDS_TEXT_SYNC_OUT       "Sync Out"
+    IDS_TEXT_INTERNAL       "Internal"
+    IDS_TEXT_EXTERNAL       "External"
+    IDS_TEXT_SIGNAL         "Signal"
+    IDS_TEXT_POSI           "POSI"
+    IDS_TEXT_NEGA           "NEGA"
+END
+
+STRINGTABLE
+BEGIN
+    AFX_IDS_APP_TITLE       "CamMonitor"
+    AFX_IDS_IDLEMESSAGE     "Ready"
+END
+
+STRINGTABLE
+BEGIN
+    ID_INDICATOR_EXT        "EXT"
+    ID_INDICATOR_CAPS       "CAP"
+    ID_INDICATOR_NUM        "NUM"
+    ID_INDICATOR_SCRL       "SCRL"
+    ID_INDICATOR_OVR        "OVR"
+    ID_INDICATOR_REC        "REC"
+END
+
+STRINGTABLE
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
+    ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
+END
+
+STRINGTABLE
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE
+BEGIN
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_COPY            "Copy the selection and put it on the Clipboard\nCopy"
+    ID_EDIT_CUT             "Cut the selection and put it on the Clipboard\nCut"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_PASTE           "Insert Clipboard contents\nPaste"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+    ID_EDIT_UNDO            "Undo the last action\nUndo"
+    ID_EDIT_REDO            "Redo the previously undone action\nRedo"
+END
+
+STRINGTABLE
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle Status Bar"
+END
+
+STRINGTABLE
+BEGIN
+    AFX_IDS_SCSIZE          "Change the window size"
+    AFX_IDS_SCMOVE          "Change the window position"
+    AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    AFX_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    AFX_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    AFX_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE
+BEGIN
+    AFX_IDS_SCRESTORE       "Restore the window to normal size"
+    AFX_IDS_SCTASKLIST      "Activate Task List"
+END
+
+STRINGTABLE
+BEGIN
+    ID_EDIT_ZOOM_IN         "Zoom in\nZoom in"
+    ID_EDIT_ZOOM_OUT        "Zoom out\nZoom out"
+    ID_EDIT_ZOOM_FIT        "Fit image on screen\nFit image on screen"
+    ID_EDIT_ZOOM_DEFAULT    "Display origin size\nDisplay origin size"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_STOP                "停止"
+    IDS_CLOSE               "閉じる"
+    IDS_SYNC_IN_EXTERNAL    "外部"
+    IDS_DRAWTEXT_FILE       "Sequence no: %1d\n"
+    IDS_QUALITY_NORMAL      "Normal"
+    IDS_QUALITY_LOW         "Low"
+    IDS_QUALITY_HIGH        "High"
+    IDS_ERROR_OUTPUT_CSV    "Output CSV Error."
+    IDS_SAVE_CSV_FILTER     "CSV File (*.csv)|*.csv||"
+    IDS_COMPLETED           "Completed."
+    IDS_ERROR_SAVE          "Save Error."
+    IDS_TEXT_SINGLE         "設定モード"
+    IDS_TEXT_CONTINUOUS     "録画モード"
+    IDS_TEXT_RECORD_MODE    "撮影方式"
+    IDS_TEXT_MEMORY         "メモリ"
+    IDS_TEXT_STORAGE        "ストリーミング"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_TEXT_DELAY          "信号遅延"
+    IDS_TEXT_WIDTH          "信号幅"
+    IDS_TEXT_MAGNIFICATION  "信号倍率"
+    IDS_TEXT_QUANTIZATION   "量子化テーブル"
+    IDS_TEXT_DECODE_POSITON "Decode Position"
+    IDS_TEXT_DECODE_MODE    "Decode Mode"
+    IDS_TEXT_SAVE_TO        "保存先"
+    IDS_TEXT_RESET_SEQNO    "リセット SeqNo"
+    IDS_TEXT_SNAPSHOT       "スナップショット"
+    IDS_TEXT_RECORD         "撮影"
+    IDS_TEXT_STOP           "停止"
+    IDS_TEXT_OPEN_FILE      "Open File"
+    IDS_TEXT_FILE_INFO      "ファイル情報"
+    IDS_TEXT_FILE_PATH      "パス"
+    IDS_TEXT_FRAME_RATE     "撮影速度"
+    IDS_TEXT_SIZE           "解像度"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_TEXT_FRAME_COUNT    "フレーム数"
+    IDS_TEXT_PLAYBACK       "再生"
+    IDS_TEXT_RESAVE_FORMAT  "再保存形式"
+    IDS_TEXT_DROP_FRAME_INTERPOLATE "ドロップフレームの補間処理"
+    IDS_TEXT_NON            "なし"
+    IDS_TEXT_BLACK_IMAGE    "黒画像"
+    IDS_TEXT_PREFRAME_IMAGE "前フレーム画像"
+    IDS_TEXT_SAVE           "保存"
+    IDS_OUTPUT_DROP_FRAMES  "ドロップフレーム情報出力"
+    IDS_TEXT_SAVE_FILE      "保存中"
+    IDS_TEXT_LANGUAGE_CHANGE "再起動後に指定した言語に切り替えます。"
+END
+
 #endif    // 日本語 (日本) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -368,6 +545,42 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// Menu
+//
+
+IDR_MAINFRAME MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About CamMonitor...",        ID_APP_ABOUT
+    END
+    POPUP "Language"
+    BEGIN
+        MENUITEM "English",                     ID_LANGUAGE_ENGLISH
+        MENUITEM "Japanese",                    ID_LANGUAGE_JAPANESE
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // Dialog
 //
 
@@ -377,8 +590,8 @@ CAPTION "About CamMonitor"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,14,14,20,20
-    LTEXT           "CamMonitor, Version 1.6.0.0",IDC_STATIC,42,14,132,8,SS_NOPREFIX
-    LTEXT           "Copyright (C) 2023 PHOTRON LIMITED",IDC_STATIC,42,26,140,8
+    LTEXT           "CamMonitor, Version 1.6.1.0",IDC_STATIC,42,14,132,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2020-2025 PHOTRON LIMITED",IDC_STATIC,42,26,140,8
     DEFPUSHBUTTON   "OK",IDOK,150,41,50,14,WS_GROUP
 END
 
@@ -447,37 +660,6 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Menu
-//
-
-IDR_MAINFRAME MENU
-BEGIN
-    POPUP "&File"
-    BEGIN
-        MENUITEM "E&xit",                       ID_APP_EXIT
-    END
-    POPUP "&Edit"
-    BEGIN
-        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
-        MENUITEM SEPARATOR
-        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
-        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
-        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
-    END
-    POPUP "&View"
-    BEGIN
-        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
-        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
-    END
-    POPUP "&Help"
-    BEGIN
-        MENUITEM "&About CamMonitor...",        ID_APP_ABOUT
-    END
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // Accelerator
 //
 
@@ -502,8 +684,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,6,0,0
- PRODUCTVERSION 1,6,0,0
+ FILEVERSION 1,6,1,0
+ PRODUCTVERSION 1,6,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -520,12 +702,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "PHOTRON LIMITED"
             VALUE "FileDescription", "CamMonitor"
-            VALUE "FileVersion", "1.6.0.0"
+            VALUE "FileVersion", "1.6.1.0"
             VALUE "InternalName", "CamMonitor.exe"
-            VALUE "LegalCopyright", "Copyright (C) 2023 PHOTRON LIMITED"
+            VALUE "LegalCopyright", "Copyright (C) 2020-2025 PHOTRON LIMITED"
             VALUE "OriginalFilename", "CamMonitor.exe"
             VALUE "ProductName", "Photron USB Control SDK Sample Application"
-            VALUE "ProductVersion", "1.6.0.0"
+            VALUE "ProductVersion", "1.6.1.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -550,6 +732,7 @@ BEGIN
     IDS_OPEN_FILTER         "Camera Info Header Files (*.cih)|*.cih||"
     IDS_PAUSE               "Pause"
     IDS_RESTART_MSG         "Writing is complete. \r\nPlease restart the software and the camera."
+    IDS_TEXT_ACQUISITION_MODE "Acquisition Mode"
     IDS_DRAWTEXT_CAMERA     "Sequence no: %1d\nSensor Temperature: %2d\n"
     IDS_ERROR_CODE          "Error! %1!s! error code: %2!u! ."
     IDS_SYNC_IN_INTERNAL    "Internal"
@@ -559,6 +742,20 @@ STRINGTABLE
 BEGIN
     IDR_MAINFRAME           "CamMonitor"
     IDS_ERROR_NOT_SUPPORTED "Not Supported."
+    IDS_TEXT_RECORD_TIME    "Record Time"
+    IDS_TEXT_SETUP          "Setup"
+    IDS_TEXT_FRAMERATE      "Framerate"
+    IDS_TEXT_SHUTTER_SPEED  "Shutter Speed"
+    IDS_TEXT_RESOLUTION     "Resolution"
+    IDS_TEXT_ADVANCED_SETTING "Advanced Setting"
+    IDS_TEXT_EXPOSE         "Expose"
+    IDS_TEXT_SYNC_IN        "Sync In"
+    IDS_TEXT_SYNC_OUT       "Sync Out"
+    IDS_TEXT_INTERNAL       "Internal"
+    IDS_TEXT_EXTERNAL       "External"
+    IDS_TEXT_SIGNAL         "Signal"
+    IDS_TEXT_POSI           "POSI"
+    IDS_TEXT_NEGA           "NEGA"
 END
 
 STRINGTABLE
@@ -653,6 +850,46 @@ BEGIN
     IDS_SAVE_CSV_FILTER     "CSV File (*.csv)|*.csv||"
     IDS_COMPLETED           "Completed."
     IDS_ERROR_SAVE          "Save Error."
+    IDS_TEXT_SINGLE         "Single"
+    IDS_TEXT_CONTINUOUS     "Continuous"
+    IDS_TEXT_RECORD_MODE    "Record Mode"
+    IDS_TEXT_MEMORY         "Memory"
+    IDS_TEXT_STORAGE        "Storage"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_TEXT_DELAY          "Delay"
+    IDS_TEXT_WIDTH          "Width"
+    IDS_TEXT_MAGNIFICATION  "Magnification"
+    IDS_TEXT_QUANTIZATION   "Quantization"
+    IDS_TEXT_DECODE_POSITON "Decode Position"
+    IDS_TEXT_DECODE_MODE    "Decode Mode"
+    IDS_TEXT_SAVE_TO        "Save To"
+    IDS_TEXT_RESET_SEQNO    "Reset SeqNo"
+    IDS_TEXT_SNAPSHOT       "Snapshot"
+    IDS_TEXT_RECORD         "Record"
+    IDS_TEXT_STOP           "Stop"
+    IDS_TEXT_OPEN_FILE      "Open File"
+    IDS_TEXT_FILE_INFO      "File info"
+    IDS_TEXT_FILE_PATH      "Path"
+    IDS_TEXT_FRAME_RATE     "Framerate"
+    IDS_TEXT_SIZE           "Resolution"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_TEXT_FRAME_COUNT    "Frame count"
+    IDS_TEXT_PLAYBACK       "Playback"
+    IDS_TEXT_RESAVE_FORMAT  "Resave format"
+    IDS_TEXT_DROP_FRAME_INTERPOLATE "Drop frame interpolate"
+    IDS_TEXT_NON            "none"
+    IDS_TEXT_BLACK_IMAGE    "black image"
+    IDS_TEXT_PREFRAME_IMAGE "pre-frame image"
+    IDS_TEXT_SAVE           "Save"
+    IDS_OUTPUT_DROP_FRAMES  "Output Drop Frames"
+    IDS_TEXT_SAVE_FILE      "File Saving"
+    IDS_TEXT_LANGUAGE_CHANGE "Switch to selected language after reboot."
 END
 
 #endif    // 英語 (米国) resources

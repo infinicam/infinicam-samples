@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2021 PHOTRON LIMITED.
+Copyright (c) 2021-2025 PHOTRON LIMITED.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +19,37 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+### Third-party Libraries Notice
+
+This software redistributes `opencv_world460.dll`, which is part of the OpenCV project.
+
+#### OpenCV License
+OpenCV is licensed under the Apache License, Version 2.0.
+
+#### Copyright Notice
+
+Copyright (c) 2000-2025, OpenCV team All rights reserved.
+
+#### Redistribution Note
+The Apache License, Version 2.0, is included in the file `LICENSE-OpenCV`. A copy of the license can also be obtained from the official OpenCV website:
+https://opencv.org/license/
+
+---
+
+This software redistributes `opencv_videoio_ffmpeg460_64.dll`, which uses libraries from the FFmpeg project.
+
+#### FFmpeg License
+The FFmpeg libraries are licensed under the LGPLv2.1 or later (and optionally GPLv2 or later, depending on build configuration).
+
+#### Copyright Notice
+FFmpeg is copyrighted by the FFmpeg developers:Copyright (c) 2000-2025 the FFmpeg developers
+
+#### Source Code
+The source code for the FFmpeg libraries can be obtained from the official FFmpeg website:
+https://ffmpeg.org/
+
+#### Redistribution Note
+Users are entitled to modify and replace the FFmpeg libraries used by this software as permitted by the LGPL license. If required, a copy of the LGPL license is included in the distribution or can be accessed online:  
+https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html

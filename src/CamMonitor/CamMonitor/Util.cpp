@@ -56,3 +56,36 @@ CString MakeUpper(LPCTSTR str)
 	}
 	return s;
 }
+
+BOOL CheckDiskSpace(const CString& filePath, unsigned int thresholdMB)
+{
+	ULARGE_INTEGER freeBytesAvailable;
+
+	if (GetDiskFreeSpaceEx(filePath, &freeBytesAvailable, NULL, NULL))
+	{
+		ULONGLONG thresholdBytes = static_cast<ULONGLONG>(thresholdMB) * 1024 * 1024;
+		if (freeBytesAvailable.QuadPart < thresholdBytes)
+		{
+			return FALSE;
+		}
+
+		return TRUE;
+	}
+	else
+		return FALSE;
+}
+
+inline CString GetDesktopPathCString()
+{
+	TCHAR desktopPath[MAX_PATH] = { 0 };
+	HRESULT result = SHGetFolderPath(nullptr, CSIDL_DESKTOPDIRECTORY, nullptr, SHGFP_TYPE_CURRENT, desktopPath);
+
+	if (SUCCEEDED(result))
+	{
+		return desktopPath;
+	}
+	else
+	{
+		return _T("");
+	}
+}
