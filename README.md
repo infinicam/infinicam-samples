@@ -8,6 +8,8 @@ It illustrates how the INFINICAM could be used to achieve real-time live image p
 
 ## Samples
 
+For projects using OpenCV, please rewrite the .lib file to be linked according to your environment.
+
 * [bladeTrack](src/bladeTrack/README.md) The sample application "bladeTrack" explains most simple scheme of capture / process thread in conjunction with the live display. Users can easily modify the processing code to build the custom processing software maintaining the high speed capture and moderate rate of GUI display.
 
 * [eyes](src/eyes/README.md) “eyes” is a sample infinicam SDK application that demonstrates the high-speed stereo scope imaging. By using the OpenCV stereo matching functions, “eyes” detects the objects depth (distance from the camera) at 1000 fps to draw a temporal depth chart, which is far more precise than traditional 30 fps processing.
