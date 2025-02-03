@@ -1,18 +1,21 @@
 ﻿#pragma once
 
 
-typedef UINT (*FUNCPROCESSING)(INT64, CWnd*);
+typedef UINT (*FUNCPROCESSING)(INT64, INT64, INT64, CWnd*);
 
 class CProgressDialog : public CDialogEx
 {
 	DECLARE_DYNAMIC(CProgressDialog)
 
 public:
+	CProgressDialog(INT64 nStartNo, INT64 nEndNo, CWnd* pProcessingWnd);
 	CProgressDialog(INT64 nStartNo, INT64 nEndNo, FUNCPROCESSING funcProcessing, CWnd* pProcessingWnd);
 	virtual ~CProgressDialog();
 
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
+	void SetPos(int nPos);
+	void SetText(int top, int bottom);
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
@@ -30,6 +33,9 @@ protected:
 	// Controls
 	CProgressCtrl m_progressBar;
 	CString m_xvProgText;
+
+	BOOL m_isShowProgress;
+	BOOL m_bThreadExit;
 
 public:
 	DECLARE_MESSAGE_MAP()

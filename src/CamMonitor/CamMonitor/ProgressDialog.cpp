@@ -1,7 +1,7 @@
 ﻿#include "stdafx.h"
 #include "ProgressDialog.h"
 #include "resource.h"
-#include "FileTab.h"
+#include "AppDefine.h"
 
 IMPLEMENT_DYNAMIC(CProgressDialog, CDialogEx)
 
@@ -12,8 +12,19 @@ CProgressDialog::CProgressDialog(INT64 nStartNo, INT64 nEndNo, FUNCPROCESSING fu
 	, m_funcProcessing(funcProcessing)
 	, m_pProcessingWnd(pProcessingWnd)
 	, m_pThread(NULL)
+	, m_isShowProgress(TRUE)
+	, m_bThreadExit(FALSE)
 {
 
+}
+
+CProgressDialog::CProgressDialog(INT64 nStartNo, INT64 nEndNo, CWnd* pProcessingWnd)
+	:CDialogEx(IDD_PROGRESS, pProcessingWnd)
+	, m_nStartNo(nStartNo)
+	, m_nEndNo(nEndNo)
+	, m_pThread(NULL)
+	, m_isShowProgress(FALSE)
+{
 }
 
 CProgressDialog::~CProgressDialog()
@@ -30,24 +41,41 @@ void CProgressDialog::DoDataExchange(CDataExchange* pDX)
 BOOL CProgressDialog::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
+	CenterWindow();
 
 	CMenu* pMenu = GetSystemMenu(FALSE);
 	pMenu->EnableMenuItem(SC_CLOSE, MF_GRAYED);
 
 	m_progressBar.SetRange32(0, m_nEndNo - m_nStartNo + 1);
 	OnUpdateProgress(0, 0);
+	if (m_isShowProgress) 
+	{
+		m_pThread = AfxBeginThread(_Thread, (LPVOID)this, THREAD_PRIORITY_NORMAL, CREATE_SUSPENDED);
+		m_pThread->m_bAutoDelete = TRUE;
+		m_pThread->ResumeThread();
+	}
+	else
+	{
+		GetDlgItem(IDOK)->EnableWindow(FALSE);
+		GetDlgItem(IDOK)->ShowWindow(SW_HIDE);
+	}
 
-	m_pThread = AfxBeginThread(_Thread, (LPVOID)this, THREAD_PRIORITY_NORMAL, CREATE_SUSPENDED);
-	m_pThread->m_bAutoDelete = TRUE;
-	m_pThread->ResumeThread();
+	CString text;
+	text.LoadString(IDS_TEXT_SAVE_FILE);
+	SetWindowText(text);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 }
 
 void CProgressDialog::OnOK()
 {
-	m_pThread->PostThreadMessage(WM_QUIT, 0, 0);
-	WaitForSingleObject(m_pThread->m_hThread, 2000);
+	if (m_pThread != NULL)
+	{
+		m_bThreadExit = TRUE;
+		WaitForSingleObject(m_pThread->m_hThread, 2000);
+		m_pThread = NULL;
+	}
+
 	CDialogEx::OnOK();
 }
 
@@ -75,19 +103,37 @@ UINT CProgressDialog::_Thread(LPVOID pParam)
 UINT CProgressDialog::MainThread()
 {
 	MSG msg;
-
 	for (INT64 i = m_nStartNo; i <= m_nEndNo; i++)
 	{
-		if (!m_funcProcessing(i, m_pProcessingWnd))
+		if (m_bThreadExit)
+		{
+			m_bThreadExit = FALSE;
+			break;
+		}
+
+		int ret = m_funcProcessing(i, m_nStartNo, m_nEndNo, m_pProcessingWnd);
+		if (ret == RET_ERROR)
 		{
 			return -1;
 		}
-
-		PostMessage(WM_USER_UPDATE_PROGRESS, i, 0);
-
-		::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
-		if (msg.message == WM_QUIT)
+		else if (ret == RET_CONTINUE_NEXT_FRAME)
+		{
+			PostMessage(WM_USER_UPDATE_PROGRESS, i, 0);
+		}
+		else if (ret == RET_CONTINUE_CURRENT_FRAME)
+		{
+			i--;
+		}
+		else if (ret == RET_FINISH)
+		{
 			break;
+		}
+		else
+		{
+			::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
+			if (msg.message == WM_QUIT)
+				break;
+		}
 	}
 
 	return 0;
@@ -116,4 +162,15 @@ LRESULT CProgressDialog::OnUpdateProgress(WPARAM wParam, LPARAM)
 
 	UpdateData(FALSE);
 	return 0;
+}
+
+void CProgressDialog::SetPos(int nPos)
+{
+	m_progressBar.SetPos(nPos);
+}
+
+void CProgressDialog::SetText(int top, int bottom)
+{
+	m_xvProgText.Format(_T("%lld / %lld"), top, bottom);
+	UpdateData(FALSE);
 }

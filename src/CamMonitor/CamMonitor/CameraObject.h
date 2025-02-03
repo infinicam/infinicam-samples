@@ -48,6 +48,9 @@ public:
 	CBitmapImage* GetSingleImageStart();
 	void GetSingleImageEnd();
 
+	UINT32 getFramerate();
+	UINT32 getImageDataSize();
+
 protected:
 	void InitQuantization();
 
@@ -78,6 +81,9 @@ protected:
 
 	LockImage m_lockImage;
 	UINT8* m_pBuffer;
+
+	UINT32 m_framerate;
+	UINT32 m_xferDataSize;
 
 private:
 	CCameraObject(const CCameraObject&);

@@ -5,6 +5,7 @@
 #include "MainFrm.h"
 #include "CamMonitor.h"
 #include "PUCLIB.h"
+#include "Util.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -47,8 +48,10 @@ BOOL CCamMonitorApp::InitInstance()
 	InitCtrls.dwICC = ICC_WIN95_CLASSES;
 	InitCommonControlsEx(&InitCtrls);
 
-	CWinApp::InitInstance();
+	auto langID = LoadLanguagePreference();
+	SetLanguage(langID);
 
+	CWinApp::InitInstance();
 
 	// Initialize OLE libraries
 	if (!AfxOleInit())
@@ -89,7 +92,7 @@ BOOL CCamMonitorApp::InitInstance()
 		NULL);
 
 	// The one and only window has been initialized, so show and update it
-	pFrame->ShowWindow(SW_SHOW);
+	pFrame->ShowWindow(SW_SHOWMAXIMIZED);
 	pFrame->UpdateWindow();
 	return TRUE;
 }
@@ -101,7 +104,7 @@ int CCamMonitorApp::ExitInstance()
 	AfxOleTerm(FALSE);
 
 	m_dfParams.Write();
-
+	SaveLanguagePreference(m_currentLangID);
 	return CWinApp::ExitInstance();
 }
 
@@ -118,12 +121,26 @@ void CDefaultParams::Read()
 	CWinApp* pApp = AfxGetApp();
 
 	cameraSaveFolderPath = pApp->GetProfileString(REG_SECTION_DF, REG_KEY_CAMERA_SAVE_FOLDER_PATH, cameraSaveFolderPath);
+	if (cameraSaveFolderPath.IsEmpty())
+	{
+		cameraSaveFolderPath = GetDesktopPathCString();
+	}
 	cameraSaveFileName = pApp->GetProfileString(REG_SECTION_DF, REG_KEY_CAMERA_SAVE_FILE_NAME, cameraSaveFileName);
+	if (cameraSaveFileName.IsEmpty())
+	{
+		cameraSaveFileName = _T("CamMonitor");
+	}
 	cameraSaveFileType = (SAVE_FILE_TYPE)pApp->GetProfileInt(REG_SECTION_DF, REG_KEY_CAMERA_SAVE_FILE_TYPE, cameraSaveFileType);
 
 	fileOpenFolderPath = pApp->GetProfileString(REG_SECTION_DF, REG_KEY_FILE_OPEN_FOLDER_PATH, fileOpenFolderPath);
 	fileSaveFolderPath = pApp->GetProfileString(REG_SECTION_DF, REG_KEY_FILE_SAVE_FOLDER_PATH, fileSaveFolderPath);
 	fileSaveFileName = pApp->GetProfileString(REG_SECTION_DF, REG_KEY_FILE_SAVE_FILE_PATH, fileSaveFileName);
+
+	cameraFramerateIndex = pApp->GetProfileInt(REG_SECTION_DF, REG_KEY_CAMERA_FRAMERATE_INDEX, DEFAULT_FRAMERATE_INDEX);
+	cameraResolutionIndex = pApp->GetProfileInt(REG_SECTION_DF, REG_KEY_CAMERA_RESOLUTION_INDEX, DEFAULT_RESOLUTION_INDEX);
+	cameraShutterSpeedIndex = pApp->GetProfileInt(REG_SECTION_DF, REG_KEY_CAMERA_SHUTTER_INDEX, DEFAULT_SHUTTERSPEED_INDEX);
+
+	latestSaveCIHFullPath = pApp->GetProfileString(REG_SECTION_DF, REG_KEY_LATEST_CIH_FULLPATH, latestSaveCIHFullPath);
 }
 
 void CDefaultParams::Write()
@@ -137,6 +154,12 @@ void CDefaultParams::Write()
 	pApp->WriteProfileString(REG_SECTION_DF, REG_KEY_FILE_OPEN_FOLDER_PATH, fileOpenFolderPath);
 	pApp->WriteProfileString(REG_SECTION_DF, REG_KEY_FILE_SAVE_FOLDER_PATH, fileSaveFolderPath);
 	pApp->WriteProfileString(REG_SECTION_DF, REG_KEY_FILE_SAVE_FILE_PATH, fileSaveFileName);
+
+	pApp->WriteProfileInt(REG_SECTION_DF, REG_KEY_CAMERA_FRAMERATE_INDEX, cameraFramerateIndex);
+	pApp->WriteProfileInt(REG_SECTION_DF, REG_KEY_CAMERA_RESOLUTION_INDEX, cameraResolutionIndex);
+	pApp->WriteProfileInt(REG_SECTION_DF, REG_KEY_CAMERA_SHUTTER_INDEX, cameraShutterSpeedIndex);
+
+	pApp->WriteProfileString(REG_SECTION_DF, REG_KEY_LATEST_CIH_FULLPATH, latestSaveCIHFullPath);
 }
 
 
@@ -176,4 +199,20 @@ void CCamMonitorApp::OnAppAbout()
 {
 	CAboutDlg aboutDlg;
 	aboutDlg.DoModal();
+}
+
+void CCamMonitorApp::SetLanguage(WORD langID)
+{
+	SetThreadUILanguage(langID);
+	m_currentLangID = langID;
+}
+
+void CCamMonitorApp::SaveLanguagePreference(WORD langID)
+{
+	CWinApp::WriteProfileInt(_T("Settings"), _T("Language"), langID);
+}
+
+WORD CCamMonitorApp::LoadLanguagePreference()
+{
+	return CWinApp::GetProfileInt(_T("Settings"), _T("Language"), MAKELANGID(LANG_JAPANESE, SUBLANG_DEFAULT));
 }

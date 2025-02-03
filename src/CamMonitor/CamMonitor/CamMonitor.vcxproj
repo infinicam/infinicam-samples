@@ -60,21 +60,21 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../../../include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../include;C:\opencv\build\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>PUCLIB.lib;</AdditionalDependencies>
+      <AdditionalDependencies>PUCLIB.lib;opencv_world460d.lib</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>../../../lib;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../../lib;C:\opencv\build\x64\vc15\lib;</AdditionalLibraryDirectories>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </Midl>
     <ResourceCompile>
-      <Culture>0x0409</Culture>
+      <Culture>0x0411</Culture>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
@@ -92,16 +92,16 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../../../include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\opencv\build\include;../../../include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>PUCLIB.lib;</AdditionalDependencies>
+      <AdditionalDependencies>PUCLIB.lib;opencv_world460.lib</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>../../../lib;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\opencv\build\x64\vc15\lib;../../../lib</AdditionalLibraryDirectories>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -127,6 +127,7 @@
     <ClInclude Include="CameraObject.h" />
     <ClInclude Include="CamMonitor.h" />
     <ClInclude Include="ChildView.h" />
+    <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="FileTab.h" />
     <ClInclude Include="LiveTab.h" />
     <ClInclude Include="Lock.h" />
@@ -155,6 +156,7 @@
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="cih.cpp" />
     <ClCompile Include="ProgressDialog.cpp" />
+    <ClCompile Include="RingBuffer.cpp" />
     <ClCompile Include="SaveFileDialog.cpp" />
     <ClCompile Include="SaveLiveDialog.cpp" />
     <ClCompile Include="SelectCameraDialog.cpp" />

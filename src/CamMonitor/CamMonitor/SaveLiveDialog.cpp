@@ -70,9 +70,14 @@ void CSaveLiveDialog::OnBnClickedOk()
 	UpdateData(TRUE);
 
 	CDefaultParams& df = ((CCamMonitorApp*)AfxGetApp())->GetDefaultParams();
+
+	if (m_xvFolderpath.IsEmpty())
+	{
+		m_xvFolderpath = "";
+	}
 	df.cameraSaveFolderPath = m_xvFolderpath;
 	df.cameraSaveFileName = m_xvFilename;
 	df.cameraSaveFileType = (SAVE_FILE_TYPE)m_xvSaveFileType;
-
+	
 	CDialogEx::OnOK();
 }

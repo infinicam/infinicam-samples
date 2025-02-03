@@ -5,6 +5,9 @@
 #include "PUCLIB.h"
 #include "PUCUTIL.h"
 #include "CameraObject.h"
+#include <SetupAPI.h>
+#include "RingBuffer.h"
+
 
 class CLiveTab : public CBaseTab
 {
@@ -20,6 +23,13 @@ public:
 
 	virtual LockImage* GetLockImage() { return &m_lockImage; }
 	virtual LockBuffer* GetLockTextInfo() { return &m_lockTextInfo; }
+
+	void setSaveFilePath(CString path) { m_filepath = path; }
+	CString getSaveFilePath() { return m_filepath; }
+	void setSaveFolderPath(CString folder) { m_folderPath = folder; }
+	CString getSaveFolderPath() { return m_folderPath; }
+	void UpdateControlText();
+	void setLanguage(WORD langID) { m_langID = langID; }
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
@@ -70,6 +80,12 @@ protected:
 	void UpdateLiveUI();
 
 private:
+	CString ConvertToTimeFormat(ULONGLONG totalseconds);
+	ULONGLONG CalcRecordTimeSecond();
+	std::unique_ptr<RingBuffer> CreateRingBuffer(UINT32 imageSize);
+	double GetAvailableRAMSpace();
+
+private:
 	CCameraObject m_camera;
 
 	// live
@@ -108,6 +124,14 @@ private:
 	int m_decodeMode;
 	BOOL m_enableDecodeGPU;
 
+	CString m_filepath;
+	CString m_folderPath;
+	std::unique_ptr<RingBuffer> m_ringBuffer;
+	BOOL m_isMemoryRecord;
+	CString m_saveTimeStamp;
+
+	WORD m_langID;
+
 public:
 	DECLARE_MESSAGE_MAP()
 	afx_msg LRESULT OnInitDialog(WPARAM wParam, LPARAM lParam);
@@ -141,4 +165,9 @@ public:
 	afx_msg void OnBnClickedDecodeCPU();
 	afx_msg void OnBnClickedDecodeGPU();
 
+	afx_msg void OnBnClickedCheckAdvancedSetting();
+	afx_msg void OnBnClickedRecordModeMemory();
+	afx_msg void OnBnClickedRecordModeStorage();
+	afx_msg void OnDeltaposSpinRecordtime(NMHDR* pNMHDR, LRESULT* pResult);
 };
+
