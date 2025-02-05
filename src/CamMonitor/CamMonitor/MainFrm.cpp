@@ -46,6 +46,8 @@ void CMainFrame::OnLanguageChange(UINT nID)
 		langID = MAKELANGID(LANG_JAPANESE, SUBLANG_DEFAULT);
 
 	theApp.SetLanguage(langID);
+	theApp.SaveLanguagePreference(langID);
+
 	auto liveTab = (CLiveTab*)m_wndTabDlgBar.GetTab(TAB_LIVE);
 	liveTab->setLanguage(langID);
 	auto fileTab = (CFileTab*)m_wndTabDlgBar.GetTab(TAB_LIVE);
