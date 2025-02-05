@@ -590,7 +590,7 @@ CAPTION "About CamMonitor"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,14,14,20,20
-    LTEXT           "CamMonitor, Version 1.6.1.0",IDC_STATIC,42,14,132,8,SS_NOPREFIX
+    LTEXT           "CamMonitor, Version 1.6.1.1",IDC_STATIC,42,14,132,8,SS_NOPREFIX
     LTEXT           "Copyright (C) 2020-2025 PHOTRON LIMITED",IDC_STATIC,42,26,140,8
     DEFPUSHBUTTON   "OK",IDOK,150,41,50,14,WS_GROUP
 END
@@ -684,8 +684,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,6,1,0
- PRODUCTVERSION 1,6,1,0
+ FILEVERSION 1,6,1,1
+ PRODUCTVERSION 1,6,1,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -702,12 +702,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "PHOTRON LIMITED"
             VALUE "FileDescription", "CamMonitor"
-            VALUE "FileVersion", "1.6.1.0"
+            VALUE "FileVersion", "1.6.1.1"
             VALUE "InternalName", "CamMonitor.exe"
             VALUE "LegalCopyright", "Copyright (C) 2020-2025 PHOTRON LIMITED"
             VALUE "OriginalFilename", "CamMonitor.exe"
             VALUE "ProductName", "Photron USB Control SDK Sample Application"
-            VALUE "ProductVersion", "1.6.1.0"
+            VALUE "ProductVersion", "1.6.1.1"
         END
     END
     BLOCK "VarFileInfo"
