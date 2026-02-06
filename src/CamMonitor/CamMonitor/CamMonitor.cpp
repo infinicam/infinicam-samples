@@ -216,3 +216,13 @@ WORD CCamMonitorApp::LoadLanguagePreference()
 {
 	return CWinApp::GetProfileInt(_T("Settings"), _T("Language"), MAKELANGID(LANG_JAPANESE, SUBLANG_DEFAULT));
 }
+
+void CCamMonitorApp::SaveStartupModePreference(int mode)
+{
+	CWinApp::WriteProfileInt(_T("Settings"), _T("StartupMode"), mode);
+}
+
+int CCamMonitorApp::LoadStartupModePreference()
+{
+	return CWinApp::GetProfileInt(_T("Settings"), _T("StartupMode"), SETTING);
+}

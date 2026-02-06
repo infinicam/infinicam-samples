@@ -20,7 +20,11 @@ public:
 
 	void FillBlack() { memset(m_pBuff, 0x00, m_nLineBytes * m_nHeight); }
 
-	BOOL Save(LPCTSTR fileName);
+	BOOL Save(LPCTSTR fileName, int rotationCount = 0);
+
+	UINT32 GetRotatedBufferSize(int rorationCount) const;
+	void rotateImageBuffer(int rotationCount, BYTE* pDstBuffer) const;
+	BITMAPINFO* GetRotatedBitmapInfo(int rotationCount) const;
 
 private:
 	CBitmapImage(const CBitmapImage&);

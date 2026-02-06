@@ -266,13 +266,20 @@
 #define ID_M_HISTGRAM                   32780
 #define ID_LANGUAGE_ENGLISH             32781
 #define ID_LANGUAGE_JAPANESE            32782
+#define ID_SETTING_STARTUPMODE          32783
+#define ID_STARTUPMODE_SETTING          32784
+#define ID_STARTUPMODE_RECORD           32785
+#define ID_BUTTON32787                  32787
+#define ID_EDIT_ROTATE                  32787
+#define ID_BUTTON32794                  32794
+#define ID_BUTTON32795                  32795
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        337
-#define _APS_NEXT_COMMAND_VALUE         32783
+#define _APS_NEXT_COMMAND_VALUE         32796
 #define _APS_NEXT_CONTROL_VALUE         1131
 #define _APS_NEXT_SYMED_VALUE           310
 #endif

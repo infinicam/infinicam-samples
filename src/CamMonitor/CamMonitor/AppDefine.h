@@ -79,7 +79,14 @@ enum
 	RET_CONTINUE_NEXT_FRAME =1,
 	RET_CONTINUE_CURRENT_FRAME = 2,
 	RET_FINISH = 3,
+	RET_CANCEL = 4,
 };
+
+typedef enum
+{
+	SETTING = 0,
+	RECORD = 1,
+} STARTUP_MODE;
 
 // Macro
 #define GET_VIEW() (AfxGetMainWnd() ? ((CFrameWnd*)AfxGetMainWnd())->GetActiveView() : NULL);

@@ -67,7 +67,7 @@ END
 //
 
 IDD_LIVE DIALOGEX 0, 0, 236, 492
-STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_VSCROLL | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     PUSHBUTTON      "Open Camera",IDC_OPENCAMERA,15,7,65,17
@@ -258,7 +258,7 @@ BEGIN
     IDD_LIVE, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 117
+        RIGHTMARGIN, 105
         TOPMARGIN, 7
         BOTTOMMARGIN, 110
         HORZGUIDE, 1
@@ -545,42 +545,6 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Menu
-//
-
-IDR_MAINFRAME MENU
-BEGIN
-    POPUP "&File"
-    BEGIN
-        MENUITEM "E&xit",                       ID_APP_EXIT
-    END
-    POPUP "&Edit"
-    BEGIN
-        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
-        MENUITEM SEPARATOR
-        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
-        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
-        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
-    END
-    POPUP "&View"
-    BEGIN
-        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
-        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
-    END
-    POPUP "&Help"
-    BEGIN
-        MENUITEM "&About CamMonitor...",        ID_APP_ABOUT
-    END
-    POPUP "Language"
-    BEGIN
-        MENUITEM "English",                     ID_LANGUAGE_ENGLISH
-        MENUITEM "Japanese",                    ID_LANGUAGE_JAPANESE
-    END
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // Dialog
 //
 
@@ -590,8 +554,8 @@ CAPTION "About CamMonitor"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,14,14,20,20
-    LTEXT           "CamMonitor, Version 1.6.1.1",IDC_STATIC,42,14,132,8,SS_NOPREFIX
-    LTEXT           "Copyright (C) 2020-2025 PHOTRON LIMITED",IDC_STATIC,42,26,140,8
+    LTEXT           "CamMonitor, Version 1.6.2.0",IDC_STATIC,42,14,132,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2020-2026 PHOTRON LIMITED",IDC_STATIC,42,26,140,8
     DEFPUSHBUTTON   "OK",IDOK,150,41,50,14,WS_GROUP
 END
 
@@ -628,6 +592,50 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// Menu
+//
+
+IDR_MAINFRAME MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About CamMonitor...",        ID_APP_ABOUT
+    END
+    POPUP "Language"
+    BEGIN
+        MENUITEM "English",                     ID_LANGUAGE_ENGLISH
+        MENUITEM "Japanese",                    ID_LANGUAGE_JAPANESE
+    END
+    POPUP "Setting"
+    BEGIN
+        POPUP "Startup Mode"
+        BEGIN
+            MENUITEM "Setting",                     ID_STARTUPMODE_SETTING
+            MENUITEM "Record",                      ID_STARTUPMODE_RECORD
+        END
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // Icon
 //
 
@@ -655,6 +663,7 @@ BEGIN
     BUTTON      ID_EDIT_ZOOM_OUT
     BUTTON      ID_EDIT_ZOOM_FIT
     BUTTON      ID_EDIT_ZOOM_DEFAULT
+    BUTTON      ID_EDIT_ROTATE
 END
 
 
@@ -684,8 +693,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,6,1,1
- PRODUCTVERSION 1,6,1,1
+ FILEVERSION 1,6,2,0
+ PRODUCTVERSION 1,6,2,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -702,12 +711,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "PHOTRON LIMITED"
             VALUE "FileDescription", "CamMonitor"
-            VALUE "FileVersion", "1.6.1.1"
+            VALUE "FileVersion", "1.6.2.0"
             VALUE "InternalName", "CamMonitor.exe"
-            VALUE "LegalCopyright", "Copyright (C) 2020-2025 PHOTRON LIMITED"
+            VALUE "LegalCopyright", "Copyright (C) 2020-2026 PHOTRON LIMITED"
             VALUE "OriginalFilename", "CamMonitor.exe"
             VALUE "ProductName", "Photron USB Control SDK Sample Application"
-            VALUE "ProductVersion", "1.6.1.1"
+            VALUE "ProductVersion", "1.6.2.0"
         END
     END
     BLOCK "VarFileInfo"

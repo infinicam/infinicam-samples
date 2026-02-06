@@ -37,6 +37,10 @@ CLiveTab::CLiveTab(CWnd* pParent)
 	, m_folderPath("")
 	, m_isMemoryRecord(FALSE)
 	, m_langID(LANG_JAPANESE)
+	, m_startupMode(STARTUP_MODE::SETTING)
+	, m_rotationCount(0)
+	, m_nVScrollPos(0)
+	, m_nTotalHeight(1500)
 {
 }
 
@@ -110,13 +114,17 @@ BOOL CLiveTab::OpenCamera(UINT32 nDeviceNo, UINT32 nSingleXferTimeOut, UINT32 nC
 		if (PUC_CHK_SUCCEEDED(result))
 		{
 			m_enableDecodeGPU = TRUE;
-			OnBnClickedDecodeGPU();
+			m_decodeMode = DECODE_GPU;
+			UpdateData(FALSE);
+			UpdateControlState();
 		}
 	}
 	else
 	{
 		m_enableDecodeGPU = FALSE;
-		OnBnClickedDecodeCPU();
+		m_decodeMode = DECODE_CPU;
+		UpdateData(FALSE);
+		UpdateControlState();
 	}
 
 	m_camera.SetCallbackSingle(_SingleProc, this);
@@ -960,6 +968,11 @@ BEGIN_MESSAGE_MAP(CLiveTab, CBaseTab)
 	ON_BN_CLICKED(IDC_RECORD_MODE_MEMORY, &CLiveTab::OnBnClickedRecordModeMemory)
 	ON_BN_CLICKED(IDC_RECORD_MODE_STORAGE, &CLiveTab::OnBnClickedRecordModeStorage)
 	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_RECORDTIME, &CLiveTab::OnDeltaposSpinRecordtime)
+
+	ON_WM_VSCROLL()
+	ON_WM_SIZE()
+	ON_WM_MOUSEWHEEL()
+
 END_MESSAGE_MAP()
 
 std::string WideStringToString(const std::wstring& wideString) {
@@ -969,14 +982,16 @@ std::string WideStringToString(const std::wstring& wideString) {
 	return result;
 }
 
-LRESULT CLiveTab::OnInitDialog(WPARAM wParam, LPARAM lParam)
+bool CLiveTab::DetectAndOpenPhotronDevice()
 {
-	LRESULT ret = CBaseTab::OnInitDialog(wParam, lParam);
-	if (!ret)
-		return ret;
-
 	auto deviceInfo = SetupDiGetClassDevsA(nullptr, "USB", nullptr, DIGCF_PRESENT | DIGCF_ALLCLASSES);
-	BOOL isOpened = FALSE;
+	if (deviceInfo == INVALID_HANDLE_VALUE)
+	{
+		return false;
+	}
+
+	bool isOpened = false;
+
 	if (deviceInfo != INVALID_HANDLE_VALUE)
 	{
 		int deviceCount = 0;
@@ -1004,73 +1019,83 @@ LRESULT CLiveTab::OnInitDialog(WPARAM wParam, LPARAM lParam)
 			isOpened = OpenCamera(0, 0, 0, 1024);
 		}
 	}
+
+	return isOpened;
+}
+
+void CLiveTab::InitializeCameraUI()
+{
+	CString msg;
+	CDefaultParams& df = ((CCamMonitorApp*)AfxGetApp())->GetDefaultParams();
+
+	m_comboFramerate.SetCurSel(df.cameraFramerateIndex);
+	UINT32 nFramerate = m_comboFramerate.GetItemData(m_comboFramerate.GetCurSel());
+	auto result = PUC_SetFramerateShutter(m_camera.GetHandle(), nFramerate, nFramerate);
+	if (PUC_CHK_FAILED(result))
+	{
+		msg.FormatMessage(IDS_ERROR_CODE, _T("PUC_SetFramerateShutter"), result);
+		AfxMessageBox(msg, MB_OK | MB_ICONERROR);
+	}
+
+	UpdateBuffer();
+	UpdateFramerateComboBox();
+	UpdateShutterFpsComboBox();
+	UpdateResoComboBox();
+
+	m_comboShutterFps.SetCurSel(df.cameraShutterSpeedIndex);
+	UINT32 nShutterFps = m_comboShutterFps.GetItemData(m_comboShutterFps.GetCurSel());
+	result = PUC_SetFramerateShutter(m_camera.GetHandle(), nFramerate, nShutterFps);
+	if (PUC_CHK_FAILED(result))
+	{
+		msg.FormatMessage(IDS_ERROR_CODE, _T("PUC_SetFramerateShutter"), result);
+		AfxMessageBox(msg, MB_OK | MB_ICONERROR);
+	}
+
+	UpdateShutterFpsComboBox();
+
+	m_comboReso.SetCurSel(df.cameraResolutionIndex);
+	UINT32 nResolution = m_comboReso.GetItemData(m_comboReso.GetCurSel());
+	result = PUC_SetResolution(m_camera.GetHandle(), RESO_W(nResolution), RESO_H(nResolution));
+	if (PUC_CHK_FAILED(result))
+	{
+		msg.FormatMessage(IDS_ERROR_CODE, _T("PUC_SetResolution"), result);
+		AfxMessageBox(msg, MB_OK | MB_ICONERROR);
+	}
+
+	UpdateBuffer();
+	UpdateResoComboBox();
+
+	ResetDecodePos();
+	UpdateControlText();
+
+	if (m_startupMode == STARTUP_MODE::RECORD)
+		OnBnClickedAcquisitionContinuous();
+	else
+		OnBnClickedAcquisitionSingle();
+}
+
+LRESULT CLiveTab::OnInitDialog(WPARAM wParam, LPARAM lParam)
+{
+	LRESULT ret = CBaseTab::OnInitDialog(wParam, lParam);
+	if (!ret)
+		return ret;
+
+	bool isOpened = DetectAndOpenPhotronDevice();
 	
 	UpdateBuffer();
 	UpdateLiveUI();
-	StartLive();
 
 	UpdateControlState();
 	UpdateControlText();
 
 	if (isOpened)
 	{
-		StopLive();
-
-		CString msg;
-		CDefaultParams& df = ((CCamMonitorApp*)AfxGetApp())->GetDefaultParams();
-
-		m_comboFramerate.SetCurSel(df.cameraFramerateIndex);
-		UINT32 nFramerate = m_comboFramerate.GetItemData(m_comboFramerate.GetCurSel());
-		auto result = PUC_SetFramerateShutter(m_camera.GetHandle(), nFramerate, nFramerate);
-		if (PUC_CHK_FAILED(result))
-		{
-			msg.FormatMessage(IDS_ERROR_CODE, _T("PUC_SetFramerateShutter"), result);
-			AfxMessageBox(msg, MB_OK | MB_ICONERROR);
-		}
-
-		UpdateFramerateComboBox();
-		UpdateShutterFpsComboBox();
-		UpdateResoComboBox();
-
-		m_comboShutterFps.SetCurSel(df.cameraShutterSpeedIndex);
-		UINT32 nShutterFps = m_comboShutterFps.GetItemData(m_comboShutterFps.GetCurSel());
-		result = PUC_SetFramerateShutter(m_camera.GetHandle(), nFramerate, nShutterFps);
-		if (PUC_CHK_FAILED(result))
-		{
-			msg.FormatMessage(IDS_ERROR_CODE, _T("PUC_SetFramerateShutter"), result);
-			AfxMessageBox(msg, MB_OK | MB_ICONERROR);
-		}
-
-		UpdateFramerateComboBox();
-		UpdateShutterFpsComboBox();
-		UpdateResoComboBox();
-
-		m_comboReso.SetCurSel(df.cameraResolutionIndex);
-		UINT32 nResolution = m_comboReso.GetItemData(m_comboReso.GetCurSel());
-		result = PUC_SetResolution(m_camera.GetHandle(), RESO_W(nResolution), RESO_H(nResolution));
-		if (PUC_CHK_FAILED(result))
-		{
-			msg.FormatMessage(IDS_ERROR_CODE, _T("PUC_SetResolution"), result);
-			AfxMessageBox(msg, MB_OK | MB_ICONERROR);
-		}
-
-		UpdateFramerateComboBox();
-		UpdateShutterFpsComboBox();
-		UpdateResoComboBox();
-		UpdateExposeTime();
-		UpdateSyncOutWidthEdit();
-		UpdateSyncOutMagComboBox();
-
-		UpdateBuffer();
-		ResetDecodePos();
-
-		StartLive();
-		UpdateControlState();
-
-		OnBnClickedAcquisitionContinuous();
+		InitializeCameraUI();
 	}
 	else
+	{
 		OnBnClickedAcquisitionSingle();
+	}
 
 	OnBnClickedCheckAdvancedSetting();
 	OnBnClickedRecordModeStorage();
@@ -1078,6 +1103,8 @@ LRESULT CLiveTab::OnInitDialog(WPARAM wParam, LPARAM lParam)
 	CButton* pRecordStorage = (CButton*)GetDlgItem(IDC_RECORD_MODE_STORAGE);
 	pRecordStorage->SetCheck(BST_CHECKED);
 	GetDlgItem(IDC_PROGRESS_RINGBUFFER)->ShowWindow(SW_HIDE);
+
+	UpdateScrollBars();
 
 	return FALSE;
 }
@@ -1156,6 +1183,8 @@ void CLiveTab::OnBnClickedResetcamera()
 
 	PUC_GetXferTimeOut(m_camera.GetHandle(), &nSingleXferTimeOut, &nContinuousXferTimeout);
 	PUC_GetRingBufferCount(m_camera.GetHandle(), &nRingBufferCount);
+
+	PUC_ResetDevice(m_camera.GetDeviceNo());
 
 	if (!OpenCamera(m_camera.GetDeviceNo(), nSingleXferTimeOut, nContinuousXferTimeout, nRingBufferCount))
 		goto EXIT_LABEL;
@@ -1284,6 +1313,10 @@ void CLiveTab::OnCbnSelchangeShutterFps()
 	UpdateExposeTime();
 	UpdateSyncOutWidthEdit();
 	UpdateSyncOutMagComboBox();
+
+	// The resolution is maximized by changing the shutter speed, so UpdateBuffer() is required.
+	UpdateBuffer();
+	ResetDecodePos();
 
 	StartLive();
 	UpdateControlState();
@@ -1863,4 +1896,106 @@ void CLiveTab::OnDeltaposSpinRecordtime(NMHDR* pNMHDR, LRESULT* pResult)
 	GetDlgItem(IDC_TEXT_RECORD_TIME)->SetWindowTextW(ConvertToTimeFormat(newPos));
 
 	*pResult = 0;
+}
+
+void CLiveTab::UpdateScrollBars()
+{
+	CRect rectClient;
+	GetClientRect(&rectClient);
+
+	if (rectClient.Height() < m_nTotalHeight)
+	{
+		SCROLLINFO si;
+		si.cbSize = sizeof(SCROLLINFO);
+		si.fMask = SIF_ALL;
+		si.nMin = 0;
+		si.nMax = m_nTotalHeight;
+		si.nPage = rectClient.Height();
+		si.nPos = m_nVScrollPos;
+		SetScrollInfo(SB_VERT, &si, TRUE);
+		ShowScrollBar(SB_VERT, TRUE);
+	}
+	else
+	{
+		ShowScrollBar(SB_VERT, FALSE);
+
+		if (m_nVScrollPos != 0)
+		{
+			ScrollWindow(0, m_nVScrollPos);
+			m_nVScrollPos = 0;
+			SetScrollPos(SB_VERT, 0);
+		}
+	}
+}
+
+void CLiveTab::OnSize(UINT nType, int cx, int cy)
+{
+	CBaseTab::OnSize(nType, cx, cy);
+	UpdateScrollBars();
+}
+
+void CLiveTab::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	int nDelta;
+	int nMaxPos = m_nTotalHeight - m_nVScrollPos;
+
+	switch (nSBCode)
+	{
+	case SB_LINEDOWN:
+		nDelta = min(max(nMaxPos / 20, 5), 20);
+		break;
+
+	case SB_LINEUP:
+		nDelta = -min(max(nMaxPos / 20, 5), 20);
+		break;
+
+	case SB_PAGEDOWN:
+		nDelta = min(max(nMaxPos / 10, 5), 100);
+		break;
+
+	case SB_PAGEUP:
+		nDelta = -min(max(nMaxPos / 10, 5), 100);
+		break;
+
+	case SB_THUMBTRACK:
+		nDelta = (int)nPos - m_nVScrollPos;
+		break;
+
+	default:
+		return;
+	}
+
+	int nNewPos = m_nVScrollPos + nDelta;
+
+	CRect rectClient;
+	GetClientRect(&rectClient);
+	int nMaxLimit = m_nTotalHeight - rectClient.Height();
+
+	if (nNewPos < 0) 
+		nNewPos = 0;
+
+	if (nNewPos > nMaxLimit) 
+		nNewPos = nMaxLimit;
+
+	int nScrollAmount = m_nVScrollPos - nNewPos;
+
+	if (nScrollAmount != 0)
+	{
+		m_nVScrollPos = nNewPos;
+		SetScrollPos(SB_VERT, m_nVScrollPos);
+		ScrollWindow(0, nScrollAmount);
+		UpdateWindow();
+	}
+
+	CBaseTab::OnVScroll(nSBCode, nPos, pScrollBar);
+}
+
+BOOL CLiveTab::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+{
+	UINT nCode = (zDelta < 0) ? SB_LINEDOWN : SB_LINEUP;
+
+	for (int i = 0; i < 3; i++)
+		OnVScroll(nCode, 0, NULL);
+
+	return CBaseTab::OnMouseWheel(nFlags, zDelta, pt);
 }

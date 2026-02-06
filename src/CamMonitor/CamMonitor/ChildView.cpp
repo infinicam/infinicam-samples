@@ -15,7 +15,8 @@
 IMPLEMENT_DYNCREATE(CChildView, CZoomView)
 
 CChildView::CChildView()
-	: CZoomView()
+	: CZoomView(),
+	m_rotationCount(0)
 {
 }
 
@@ -48,10 +49,7 @@ void CChildView::OnDraw(CDC* pDC)
 	CBitmapImage* p = (CBitmapImage*)pLockImage->GetLockData();
 	CRect rc(CPoint(0, 0), CSize(p->GetWidth(), p->GetHeight()));
 
-	StretchDIBits(pDC->GetSafeHdc(),
-		0, 0, rc.Width(), rc.Height(),
-		0, 0, rc.Width(), rc.Height(),
-		p->GetBuffer(), p->GetBitmapInfo(), DIB_RGB_COLORS, SRCCOPY);
+	DrawRotatedImage(pDC, p, m_rotationCount, 0, 0);
 
 	/////////////////////
 	// text
@@ -82,6 +80,7 @@ BEGIN_MESSAGE_MAP(CChildView, CZoomView)
 	ON_COMMAND(ID_EDIT_ZOOM_OUT, &CChildView::OnZoomOut)
 	ON_COMMAND(ID_EDIT_ZOOM_FIT, &CChildView::OnZoomFit)
 	ON_COMMAND(ID_EDIT_ZOOM_DEFAULT, &CChildView::OnZoomDefault)
+	ON_COMMAND(ID_EDIT_ROTATE, &CChildView::OnRotate)
 END_MESSAGE_MAP()
 
 void CChildView::OnZoomIn()
@@ -138,4 +137,61 @@ void CChildView::OnZoomDefault()
 	ZoomDefault(CSize(p->GetWidth(), p->GetHeight()));
 	pLock->Unlock();
 	// ***Unlock***
+}
+
+void CChildView::OnRotate()
+{
+	TRACE(_T("On rotate command\n"));
+	CBaseTab* pTab = GET_ACTIVE_TAB();
+	if (!pTab)
+		return;
+
+	m_rotationCount++;
+
+	if (m_rotationCount > 3)
+		m_rotationCount = 0;
+
+	pTab->SetRotationCount(m_rotationCount);
+
+	RedrawWindow();
+}
+
+void CChildView::DrawRotatedImage(CDC* pDC, CBitmapImage* pImage, int rotationCount, int x, int y)
+{
+	if (!pImage || !pImage->GetBuffer() || !pImage->GetBitmapInfo())
+		return;
+
+	if (rotationCount == 0)
+	{
+		::StretchDIBits(
+			pDC->GetSafeHdc(),
+			x, y, pImage->GetWidth(), pImage->GetHeight(),
+			0, 0, pImage->GetWidth(), pImage->GetHeight(),
+			pImage->GetBuffer(),
+			pImage->GetBitmapInfo(),
+			DIB_RGB_COLORS,
+			SRCCOPY
+		);
+		return;
+	}
+
+	auto size = pImage->GetRotatedBufferSize(rotationCount);
+	std::vector<BYTE> rotatedBuffer;
+	rotatedBuffer.resize(size);
+
+	pImage->rotateImageBuffer(rotationCount, rotatedBuffer.data());
+	auto info = pImage->GetRotatedBitmapInfo(rotationCount);
+
+	int dstWidth = info->bmiHeader.biWidth;
+	int dstHeight = -info->bmiHeader.biHeight;
+
+	::StretchDIBits(
+		pDC->GetSafeHdc(),
+		x, y, dstWidth, dstHeight,
+		0, 0, dstWidth, dstHeight,
+		rotatedBuffer.data(),
+		info,
+		DIB_RGB_COLORS,
+		SRCCOPY
+	);
 }

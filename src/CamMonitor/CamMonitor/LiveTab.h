@@ -30,6 +30,7 @@ public:
 	CString getSaveFolderPath() { return m_folderPath; }
 	void UpdateControlText();
 	void setLanguage(WORD langID) { m_langID = langID; }
+	void setStartupMode(int mode) { m_startupMode = mode; }
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
@@ -84,6 +85,9 @@ private:
 	ULONGLONG CalcRecordTimeSecond();
 	std::unique_ptr<RingBuffer> CreateRingBuffer(UINT32 imageSize);
 	double GetAvailableRAMSpace();
+	bool DetectAndOpenPhotronDevice();
+	void InitializeCameraUI();
+	void UpdateScrollBars();
 
 private:
 	CCameraObject m_camera;
@@ -131,6 +135,11 @@ private:
 	CString m_saveTimeStamp;
 
 	WORD m_langID;
+	int m_startupMode;
+	int m_rotationCount;
+
+	int m_nVScrollPos;
+	int m_nTotalHeight;
 
 public:
 	DECLARE_MESSAGE_MAP()
@@ -169,5 +178,9 @@ public:
 	afx_msg void OnBnClickedRecordModeMemory();
 	afx_msg void OnBnClickedRecordModeStorage();
 	afx_msg void OnDeltaposSpinRecordtime(NMHDR* pNMHDR, LRESULT* pResult);
+
+	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 };
 

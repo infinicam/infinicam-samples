@@ -43,6 +43,9 @@ public:
 	void SaveLanguagePreference(LANGID langID);
 	WORD LoadLanguagePreference();
 
+	void SaveStartupModePreference(int mode);
+	int LoadStartupModePreference();
+
 private:
 	CDefaultParams m_dfParams;
 	WORD m_currentLangID;

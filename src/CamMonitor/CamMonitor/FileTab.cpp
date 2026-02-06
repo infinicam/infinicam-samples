@@ -22,7 +22,6 @@ CFileTab::CFileTab(CWnd* pParent)
 	, m_xvCurrentFrame(0)
 	, m_xvStartFrame(0)
 	, m_xvEndFrame(0)
-	, m_isVideoWriterOpened(FALSE)
 	, m_langID(LANG_JAPANESE)
 	, m_currentSaveFilePath("")
 {
@@ -299,7 +298,7 @@ UINT CFileTab::SaveImage(INT64 nFrameNo)
 
 	// ***Lock***
 	CBitmapImage* pImage = (CBitmapImage*)m_lockImage.GetLockData();
-	BOOL bResult = pImage->Save(filepath);
+	BOOL bResult = pImage->Save(filepath, m_rotationCount);
 	m_lockImage.Unlock();
 	// ***Unlock***
 	if (!bResult)
@@ -328,10 +327,10 @@ UINT CFileTab::ResaveMovie(INT64 nFrameNo)
 	int currentFrameSeqNo = pTextInfo->nSeqNo;
 	m_lockTextInfo.Unlock();
 
-	CString filepath;
-	if (!m_isVideoWriterOpened)
+	if (!m_videoWriter.isOpened())
 	{
 		CDefaultParams& df = ((CCamMonitorApp*)AfxGetApp())->GetDefaultParams();
+		CString filepath;
 		int codec = 0;
 		double fps = 30;
 
@@ -347,68 +346,94 @@ UINT CFileTab::ResaveMovie(INT64 nFrameNo)
 		}
 		m_currentSaveFilePath = df.fileSaveFolderPath;
 
-		cv::Size frameSize(m_cih.m_width, m_cih.m_height);
-		if (!m_videoWriter.open(std::string(CT2A(filepath)), codec, fps, frameSize, false))
+		// Check existing files
+		DWORD attr = GetFileAttributes(filepath);
+		if (attr != INVALID_FILE_ATTRIBUTES && !(attr & FILE_ATTRIBUTE_DIRECTORY))
+		{
+			CString msg;
+			msg.Format(_T("Specified file already exist.\n\n%s\n\n Do you want to overwrite it?"), (LPCTSTR)filepath);
+			if (AfxMessageBox(msg, MB_YESNO | MB_ICONQUESTION) != IDYES)
+			{
+				return RET_CANCEL;
+			}
+		}
+
+		if (!CheckDiskSpace(m_currentSaveFilePath, 1024))
+		{
+			AfxMessageBox(_T("Insufficient storage space. Resave process will be terminated."), MB_OK | MB_ICONERROR);
+			return RET_CANCEL;
+		}
+
+		bool swapWH = (m_rotationCount & 1);
+		auto width = swapWH ? m_cih.m_height : m_cih.m_width;
+		auto height = swapWH ? m_cih.m_width : m_cih.m_height;
+
+		if (!m_videoWriter.open(std::string(CT2A(filepath)), codec, fps, cv::Size(width, height), false))
 		{
 			AfxMessageBox(_T("Failed to open video writer"), MB_OK | MB_ICONERROR);
 			return RET_ERROR;
 		}
 
 		m_videoWriter.set(cv::VIDEOWRITER_PROP_QUALITY, 100);
-		m_isVideoWriterOpened = TRUE;
 
 		// preFrameSeqNo is the sequence number of the most recently loaded image.
 		// It will be the sequence number of the last image displayed on the playback screen, so initialize it here.
 		preFrameSeqNo = currentFrameSeqNo - 1;
 	}
 
-	BOOL isStorageAvailable = CheckDiskSpace(m_currentSaveFilePath, 1024);
-
-	if (isStorageAvailable)
+	if (!CheckDiskSpace(m_currentSaveFilePath, 1024))
 	{
-		if (currentFrameSeqNo < preFrameSeqNo)
-		{
-			// This branch is when the sequence number goes around once.
-			// Evaluate continuity by correcting preFrameSeqNo.
-			preFrameSeqNo -= MAX_SEQUENCE_NO + 1;
-		}
+		m_videoWriter.release();
+		AfxMessageBox(_T("Insufficient storage space. Resave process will be terminated."), MB_OK | MB_ICONERROR);
+		return RET_CANCEL;
+	}
 
-		if (currentFrameSeqNo == preFrameSeqNo + 1)
+	if (currentFrameSeqNo < preFrameSeqNo)
+	{
+		// This branch is when the sequence number goes around once.
+		// Evaluate continuity by correcting preFrameSeqNo.
+		preFrameSeqNo -= MAX_SEQUENCE_NO + 1;
+	}
+
+	cv::Mat image;
+	{
+		CBitmapImage* pImage = (CBitmapImage*)m_lockImage.GetLockData();
+		cv::Mat src(m_cih.m_height, m_cih.m_width, CV_8UC1, pImage->GetBuffer(), pImage->GetLineByte());
+		image = RotateImageForView(src);
+		m_lockImage.Unlock();
+	}
+
+	if (currentFrameSeqNo == preFrameSeqNo + 1)
+	{
+		// Case : no drop frame
+		m_preImage = image.clone();
+		m_videoWriter.write(image);
+	}
+	else
+	{
+		// Case : exist drop frame
+		if (m_interpolateFrame == INTERPOLATE_FRAME::INTERPOLATE_BLACK)
 		{
-			// Case : no drop frame
-			CBitmapImage* pImage = (CBitmapImage*)m_lockImage.GetLockData();
-			cv::Mat frame(m_cih.m_height, m_cih.m_width, CV_8UC1, pImage->GetBuffer(), pImage->GetLineByte());
-			m_preImage = frame;
+			cv::Mat frame(image.rows, image.cols, CV_8UC1, cv::Scalar(0));
 			m_videoWriter.write(frame);
-			m_lockImage.Unlock();
+		}
+		else if (m_interpolateFrame == INTERPOLATE_FRAME::INTERPOLATE_PREFRAME)
+		{
+			m_videoWriter.write(m_preImage);
 		}
 		else
 		{
-			// Case : exist drop frame
-			if (m_interpolateFrame == INTERPOLATE_FRAME::INTERPOLATE_BLACK)
-			{
-				cv::Mat frame(m_cih.m_height, m_cih.m_width, CV_8UC1, cv::Scalar(0));
-				m_videoWriter.write(frame);
-			}
-			else if (m_interpolateFrame == INTERPOLATE_FRAME::INTERPOLATE_PREFRAME)
-			{
-				m_videoWriter.write(m_preImage);
-			}
-			else
-			{
-			}
-
-			pTextInfo = (PTEXTINFO)m_lockTextInfo.GetLockData();
-			pTextInfo->nSeqNo = preFrameSeqNo + 1;
-			m_lockTextInfo.Unlock();
-
-			return RET_CONTINUE_CURRENT_FRAME;
 		}
+
+		pTextInfo = (PTEXTINFO)m_lockTextInfo.GetLockData();
+		pTextInfo->nSeqNo = preFrameSeqNo + 1;
+		m_lockTextInfo.Unlock();
+
+		return RET_CONTINUE_CURRENT_FRAME;
 	}
 
-	if (nFrameNo == m_resaveEndFrame || !isStorageAvailable)
+	if (nFrameNo == m_resaveEndFrame)
 	{
-		m_isVideoWriterOpened = FALSE;
 		m_videoWriter.release();
 		return RET_FINISH;
 	}
@@ -428,11 +453,23 @@ UINT CFileTab::ResaveRawFile(INT64 nFrameNo)
 {
 	CString filepath;
 
-	if (!m_isVideoWriterOpened)
+	if (!m_videoWriter.isOpened())
 	{
 		CDefaultParams& df = ((CCamMonitorApp*)AfxGetApp())->GetDefaultParams();
 		filepath.Format(_T("%s\\%s.mdat"), df.fileSaveFolderPath, df.fileSaveFileName);
 		m_currentSaveFilePath = df.fileSaveFolderPath;
+
+		// Check existing files
+		DWORD attr = GetFileAttributes(filepath);
+		if (attr != INVALID_FILE_ATTRIBUTES && !(attr & FILE_ATTRIBUTE_DIRECTORY))
+		{
+			CString msg;
+			msg.Format(_T("Specified file already exist.\n\n%s\n\n Do you want to overwrite it?"), (LPCTSTR)filepath);
+			if (AfxMessageBox(msg, MB_YESNO | MB_ICONQUESTION) != IDYES)
+			{
+				return RET_CANCEL;
+			}
+		}
 
 		FILE* fp = NULL;
 		errno_t error = _tfopen_s(&fp, filepath, _T("wb"));
@@ -456,7 +493,6 @@ UINT CFileTab::ResaveRawFile(INT64 nFrameNo)
 			m_mdatFile = fp;
 		}
 
-		m_isVideoWriterOpened = TRUE;
 		m_saveframeCount = 0;
 	}
 
@@ -471,7 +507,6 @@ UINT CFileTab::ResaveRawFile(INT64 nFrameNo)
 
 	if (nFrameNo == m_resaveEndFrame || !isStorageAvailable)
 	{
-		m_isVideoWriterOpened = FALSE;
 		fclose(m_mdatFile);
 		m_mdatFile = nullptr;
 
@@ -932,8 +967,6 @@ void CFileTab::OnBnClickedSaveToFile()
 		m_interpolateFrame = INTERPOLATE_FRAME::INTERPOLATE_PREFRAME;
 	}
 
-	m_isVideoWriterOpened = FALSE;
-
 	switch (m_resaveFormat)
 	{
 		case RESAVE_FORMAT::RESAVE_FORMTT_RAW:
@@ -967,4 +1000,29 @@ void CFileTab::OnBnClickedSaveToFile()
 		default:
 			break;
 	}
+}
+
+cv::Mat CFileTab::RotateImageForView(const cv::Mat& src)
+{
+	cv::Mat dst;
+	switch (m_rotationCount) 
+	{
+		case 0: // 0 deg
+			dst = src;
+			break;
+
+		case 1: // 90 deg
+			cv::rotate(src, dst, cv::ROTATE_90_CLOCKWISE);
+			break;
+
+		case 2: // 180 deg
+			cv::rotate(src, dst, cv::ROTATE_180);
+			break;
+
+		case 3: // 270 deg
+			cv::rotate(src, dst, cv::ROTATE_90_COUNTERCLOCKWISE);
+			break;
+	}
+
+	return dst;
 }
