@@ -22,7 +22,9 @@ void* LockBuffer::GetLockData()
 
 void LockBuffer::Create(INT nSize)
 {
-	delete[] m_pBuffer;
+	if(m_pBuffer != nullptr)
+		delete[] m_pBuffer;
+
 	m_pBuffer = new BYTE[nSize];
 	memset(m_pBuffer, 0, nSize);
 	m_nSize = nSize;

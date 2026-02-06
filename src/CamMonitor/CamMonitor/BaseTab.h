@@ -22,9 +22,11 @@ public:
 
 	virtual LockImage* GetLockImage() = 0;
 	virtual LockBuffer* GetLockTextInfo() = 0;
+	void SetRotationCount(const int count);
 
 protected:
 	CString m_name;
+	int m_rotationCount;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

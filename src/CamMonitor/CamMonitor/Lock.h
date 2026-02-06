@@ -30,13 +30,15 @@ public:
 	LockBuffer(INT nSize);
 	virtual ~LockBuffer();
 
+	LockBuffer(const LockBuffer&) = delete;
+	LockBuffer& operator=(const LockBuffer&) = delete;
+
 	void* GetLockData();
 	INT GetSize() const { return m_nSize; }
-
 	void Create(INT nSize);
 
 private:
-	void* m_pBuffer;
+	BYTE* m_pBuffer;
 	INT m_nSize;
 };
 

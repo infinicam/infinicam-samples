@@ -91,6 +91,10 @@ UINT CProgressDialog::_Thread(LPVOID pParam)
 		s.LoadString(IDS_COMPLETED);
 		AfxMessageBox(s, MB_OK | MB_ICONINFORMATION);
 	}
+	else if (result == RET_CANCEL)
+	{
+		p->PostMessage(WM_COMMAND, IDOK);
+	}
 	else
 	{
 		s.LoadString(IDS_ERROR_SAVE);
@@ -116,6 +120,10 @@ UINT CProgressDialog::MainThread()
 		{
 			return -1;
 		}
+		else if (ret == RET_CANCEL)
+		{
+			return RET_CANCEL;
+		}
 		else if (ret == RET_CONTINUE_NEXT_FRAME)
 		{
 			PostMessage(WM_USER_UPDATE_PROGRESS, i, 0);
@@ -126,6 +134,7 @@ UINT CProgressDialog::MainThread()
 		}
 		else if (ret == RET_FINISH)
 		{
+			PostMessage(WM_USER_UPDATE_PROGRESS, m_nEndNo, 0);
 			break;
 		}
 		else

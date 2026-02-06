@@ -49,7 +49,6 @@ public:
 	void UpdateControlText();
 	void setLanguage(WORD langID) { m_langID = langID; }
 
-
 protected:
 	void UpdateControlState();
 
@@ -80,6 +79,8 @@ protected:
 
 	void DecodeImage();
 
+	cv::Mat RotateImageForView(const cv::Mat& src);
+
 private:
 	BOOL m_bOpened;
 	BOOL m_bPlaying;
@@ -98,7 +99,6 @@ private:
 	CComboBox m_comboFormat;
 
 	cv::VideoWriter m_videoWriter;
-	BOOL m_isVideoWriterOpened;
 	int m_resaveStartFrame;
 	int m_resaveEndFrame;
 	int m_resaveFormat;
@@ -109,7 +109,6 @@ private:
 	CString m_currentSaveFilePath;
 
 	WORD m_langID;
-
 
 public:
 	DECLARE_MESSAGE_MAP()

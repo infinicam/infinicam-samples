@@ -19,6 +19,9 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CREATE()
 	ON_WM_SETFOCUS()
 	ON_COMMAND_RANGE(ID_LANGUAGE_ENGLISH, ID_LANGUAGE_JAPANESE, &CMainFrame::OnLanguageChange)
+	ON_COMMAND_RANGE(ID_STARTUPMODE_SETTING, ID_STARTUPMODE_RECORD, &CMainFrame::OnStartupModeChange)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_STARTUPMODE_SETTING, ID_STARTUPMODE_RECORD, &CMainFrame::OnUpdateStartupMode)
+
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -58,6 +61,27 @@ void CMainFrame::OnLanguageChange(UINT nID)
 	AfxMessageBox(text);
 }
 
+void CMainFrame::OnStartupModeChange(UINT id)
+{
+	int mode = STARTUP_MODE::SETTING;
+
+	if (id == ID_STARTUPMODE_RECORD)
+		mode = STARTUP_MODE::RECORD;
+
+	theApp.SaveStartupModePreference(mode);
+
+	DrawMenuBar();
+}
+
+
+void CMainFrame::OnUpdateStartupMode(CCmdUI* pCmdUI)
+{
+	auto mode = theApp.LoadStartupModePreference();
+	if(mode == STARTUP_MODE::SETTING)
+		pCmdUI->SetCheck(pCmdUI->m_nID == ID_STARTUPMODE_SETTING);
+	else if(mode == STARTUP_MODE::RECORD)
+		pCmdUI->SetCheck(pCmdUI->m_nID == ID_STARTUPMODE_RECORD);
+}
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
@@ -101,6 +125,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	CLiveTab* pCameraTab = new CLiveTab(&m_wndTabDlgBar);
 	pCameraTab->setLanguage(langID);
+	pCameraTab->setStartupMode(theApp.LoadStartupModePreference());
 	m_wndTabDlgBar.AddTab(pCameraTab->IDD, pCameraTab->GetName(), pCameraTab);
 
 	CFileTab* pFileTab = new CFileTab(&m_wndTabDlgBar);

@@ -63,3 +63,8 @@ BOOL CBaseTab::PreTranslateMessage(MSG* pMsg)
 	}
 	return CDialog::PreTranslateMessage(pMsg);
 }
+
+void CBaseTab::SetRotationCount(const int count)
+{
+	m_rotationCount = count;
+}

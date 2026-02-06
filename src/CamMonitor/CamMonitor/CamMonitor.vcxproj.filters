@@ -152,9 +152,6 @@
     <ClCompile Include="SaveFileDialog.cpp">
       <Filter>Dialog</Filter>
     </ClCompile>
-    <ClCompile Include="RingBuffer.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CamMonitor.rc">

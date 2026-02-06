@@ -115,7 +115,11 @@ PUCRESULT CCameraObject::StartLive()
 	if (!IsOpened())
 		return PUC_SUCCEEDED;
 
-	m_thInfo.hThread = AfxBeginThread((AFX_THREADPROC)_SingleAcquitisionThread, (LPVOID)this);
+	// By default, threads are automatically destroyed when they terminate.
+	// To prevent an access violation from occurring in WaitForSingleObject inside StopLive, it is necessary to disable the automatic destruction.
+	m_thInfo.hThread = AfxBeginThread((AFX_THREADPROC)_SingleAcquitisionThread, (LPVOID)this, THREAD_PRIORITY_NORMAL, 0, CREATE_SUSPENDED, NULL);
+	m_thInfo.hThread->m_bAutoDelete = FALSE;
+	m_thInfo.hThread->ResumeThread();
 	if (m_acquisitionMode == ACQUISITION_MODE_CONTINUOUS)
 	{
 		result = PUC_BeginXferData(m_hDevice, _ContinuousCallback, this);
@@ -131,7 +135,7 @@ PUCRESULT CCameraObject::StopLive()
 	if (!IsOpened())
 		return PUC_SUCCEEDED;
 
-	// live‚ªstart‚³‚ê‚Ä‚¢‚È‚¢
+	// not live started
 	if (!m_thInfo.hThread)
 		return PUC_SUCCEEDED;
 
@@ -139,9 +143,9 @@ PUCRESULT CCameraObject::StopLive()
 	m_thInfo.exit = TRUE;
 	m_thInfo.lock.Unlock();
 	WaitForSingleObject(m_thInfo.hThread->m_hThread, INFINITE);
-	m_thInfo.hThread->m_hThread = NULL;
-	m_thInfo.hThread = NULL;
 	m_thInfo.exit = FALSE;
+	delete m_thInfo.hThread;
+	m_thInfo.hThread = nullptr;
 
 	if (m_acquisitionMode == ACQUISITION_MODE_CONTINUOUS)
 	{

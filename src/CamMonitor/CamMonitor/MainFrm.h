@@ -33,6 +33,8 @@ public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSetFocus(CWnd *pOldWnd);
 	afx_msg void OnLanguageChange(UINT nID);
+	afx_msg void OnStartupModeChange(UINT nMode);
+	afx_msg void CMainFrame::OnUpdateStartupMode(CCmdUI* pCmdUI);
 };
 
 
